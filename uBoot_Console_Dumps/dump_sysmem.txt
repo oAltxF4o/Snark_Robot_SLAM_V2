@@ -1,0 +1,28 @@
+=> dump_sysmem
+
+sysmem_dump_all:
+    --------------------------------------------------------------------
+    memory.rgn[0].addr     = 0x00200000 - 0x20000000 (size: 0x1fe00000)
+
+    memory.total           = 0x1fe00000 (510 MiB. 0 KiB)
+    --------------------------------------------------------------------
+    allocated.rgn[0].name  = "U-Boot"
+                    .addr  = 0x11de46c0 - 0x20000000 (size: 0x0e21b940)
+    allocated.rgn[1].name  = "STACK"
+                    .addr  = 0x11be46c0 - 0x11de46c0 (size: 0x00200000)
+    allocated.rgn[2].name  = "FDT"
+                    .addr  = 0x08300000 - 0x08318004 (size: 0x00018004)
+
+    kmem-resv.rgn[0].name  = "ramoops@00000000"
+                    .addr  = 0x08000000 - 0x080a0000 (size: 0x000a0000)
+
+    framework malloc_r     = 192 MiB
+    framework malloc_f     =   8 KiB
+
+    allocated.total        = 0x0e4d3944 (228 MiB. 846 KiB)
+    --------------------------------------------------------------------
+    LMB.allocated[0].addr  = 0x08300000 - 0x08318004 (size: 0x00018004)
+    LMB.allocated[1].addr  = 0x11be46c0 - 0x20000000 (size: 0x0e41b940)
+
+    reserved.core.total    = 0x0e433944 (228 MiB. 206 KiB)
+    --------------------------------------------------------------------

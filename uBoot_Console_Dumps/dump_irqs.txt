@@ -1,0 +1,11 @@
+=> dump_irqs
+ IRQ    En    Handler       Driver         Name              Count
+----------------------------------------------------------------------
+  35    1     0x1de215a0    IRQ             gpio0              1
+  36    0     0x1de215a0    IRQ             gpio1              0
+  37    0     0x1de215a0    IRQ             gpio2              0
+  38    0     0x1de215a0    IRQ             gpio3              0
+ 145    1     0x1de22230    rk8xx pmic      pmic@20            1
+ 257    1     0x1de46db0    rk8xx_pwrkey    |-- pwrkey         0
+ 258    1     0x1de46d80    rk8xx_pwrkey    |-- pwrkey         0
+ 259    0     0x1de4aa10    rk8xx pmic      |-- pmic@20        0
