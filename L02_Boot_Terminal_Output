@@ -1,0 +1,575 @@
+DDR V1.14 20190925
+D3,512MB,333MHz
+bw	col	bk	row	cs	dbw
+32	10	8	14	1	16
+OUT
+Boot1 Release Time: Sep 24 2019 13:27:46, version: 1.20
+chip_id:524b3326_0,0
+ChipType = 0x12, 460
+mmc2:cmd19,100
+SdmmcInit=2 0
+BootCapSize=1000
+UserCapSize=3776MB
+FwPartOffset=2000 , 1000
+SdmmcInit=0 NOT PRESENT
+StorageInit ok = 27271
+SecureMode = 0
+Secure read PBA: 0x4
+Secure read PBA: 0x404
+Secure read PBA: 0x804
+Secure read PBA: 0xc04
+Secure read PBA: 0x1004
+SecureInit ret = 0, SecureMode = 0
+atags_set_bootdev: ret:(0)
+GPT part:  0, name:            uboot, start:0x4000, size:0x2000
+GPT part:  1, name:            trust, start:0x6000, size:0x2000
+GPT part:  2, name:             misc, start:0x8000, size:0x2000
+GPT part:  3, name:             boot, start:0xa000, size:0x10000
+GPT part:  4, name:         recovery, start:0x1a000, size:0x10000
+GPT part:  5, name:           backup, start:0x2a000, size:0x10000
+GPT part:  6, name:              oem, start:0x3a000, size:0x3c000
+GPT part:  7, name:           rootfs, start:0x76000, size:0x200000
+GPT part:  8, name:              sys, start:0x276000, size:0x5000
+GPT part:  9, name:         userdata, start:0x27b000, size:0x4e4fdf
+find part:uboot OK. first_lba:0x4000.
+find part:trust OK. first_lba:0x6000.
+LoadTrust Addr:0x6000
+No find bl30.bin
+No find bl32.bin
+Load uboot, ReadLba = 4000
+Load OK, addr=0x200000, size=0xcafd4
+RunBL31 0x40000 @ 74562 us
+INFO:    Preloader serial: 2
+NOTICE:  BL31: v1.3(debug):ca3dd02
+NOTICE:  BL31: Built : 10:15:38, Sep 23 2019
+NOTICE:  BL31:Rockchip release version: v1.0
+INFO:    ARM GICv2 driver initialized
+INFO:    Using opteed sec cpu_context!
+INFO:    boot cpu mask: 1
+INFO:    plat_rockchip_pmu_init: pd status f00e
+INFO:    BL31: Initializing runtime services
+WARNING: No OPTEE provided by BL2 boot loader, Booting device without OPTEE initialization. SMC`s destined for OPTEE will return SMC_UNK
+ERROR:   Error initializing runtime service opteed_fast
+INFO:    BL31: Preparing for EL3 exit to normal world
+INFO:    Entry point address = 0x200000
+INFO:    SPSR = 0x3c9
+
+
+U-Boot 2017.09 (Jul 07 2020 - 18:40:52 +0800)
+
+Model: Rockchip RK3326 EVB
+PreSerial: 2
+DRAM:  510 MiB
+Sysmem: init
+Relocation Offset is: 1dbef000
+Using default environment
+
+dwmmc@ff370000: 1, dwmmc@ff390000: 0
+Bootdev(atags): mmc 0
+MMC0: High Speed, 52Mhz
+PartType: EFI
+boot mode: None
+Load FDT from boot part
+DTB: rk-kernel.dtb
+I2c speed: 400000Hz
+PMIC:  RK8090 (on=0x40, off=0x00)
+vdd_logic 1100000 uV
+vdd_arm 1100000 uV
+Model: Rockchip rk3326 evb lpddr3 v10 board for robot linux
+CLK: (sync kernel. arm: enter 600000 KHz, init 600000 KHz, kernel 600000 KHz)
+  apll 600000 KHz
+  dpll 664000 KHz
+  cpll 24000 KHz
+  npll 1188000 KHz
+  gpll 1200000 KHz
+  aclk_bus 200000 KHz
+  hclk_bus 150000 KHz
+  pclk_bus 100000 KHz
+  aclk_peri 200000 KHz
+  hclk_peri 150000 KHz
+  pclk_pmu 100000 KHz
+Net:   Net Initialization Skipped
+No ethernet found.
+Hit key to stop autoboot('CTRL+C'):  0 
+ANDROID: reboot reason: "(none)"
+Fdt Ramdisk skip relocation
+Booting LZ4 kernel at 0x03e80000(Uncompress to 0x00280000) with fdt at 0x8300000...
+
+
+## Booting Android Image at 0x03e7f800 ...
+Kernel load addr 0x00280000 size 4179 KiB
+## Flattened Device Tree blob at 08300000
+   Booting using the fdt blob at 0x8300000
+   Uncompressing Kernel Image ... OK
+  'reserved-memory' ramoops@00000000: addr=8000000 size=a0000
+   Using Device Tree in place at 0000000008300000, end 0000000008317ef7
+Adding bank: 0x00200000 - 0x20000000 (size: 0x1fe00000)
+Total: 391.595 ms
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Initializing cgroup subsys cpuset
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Initializing cgroup subsys cpuacct
+[    0.000000] Linux version 4.4.189 (zxg@zxg) (gcc version 6.3.1 20170404 (Linaro GCC 6.3-2017.05) ) #1 SMP PREEMPT Tue Jul 7 17:42:53 CST 2020
+[    0.000000] Boot CPU: AArch64 Processor [410fd042]
+[    0.000000] psci: probing for conduit method from DT.
+[    0.000000] psci: PSCIv1.0 detected in firmware.
+[    0.000000] psci: Using standard PSCI v0.2 function IDs
+[    0.000000] psci: MIGRATE_INFO_TYPE not supported.
+[    0.000000] PERCPU: Embedded 19 pages/cpu @ffffffc01ff3d000 s36968 r8192 d32664 u77824
+[    0.000000] Detected VIPT I-cache on CPU0
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 128520
+[    0.000000] Kernel command line: storagemedia=emmc androidboot.storagemedia=emmc androidboot.mode=normal  androidboot.slot_suffix= androidboot.serialno=L02M01VB__L105200823H01NF  rootwait swiotlb=1 console=ttyFIQ0 root=PARTUUID=614e0000-0000
+[    0.000000] PID hash table entries: 2048 (order: 2, 16384 bytes)
+[    0.000000] Dentry cache hash table entries: 65536 (order: 7, 524288 bytes)
+[    0.000000] Inode-cache hash table entries: 32768 (order: 6, 262144 bytes)
+[    0.000000] software IO TLB: mapped [mem 0x1fe39000-0x1fe79000] (0MB)
+[    0.000000] Memory: 501840K/522240K available (5182K kernel code, 414K rwdata, 1896K rodata, 384K init, 1694K bss, 20400K reserved, 0K cma-reserved)
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     modules : 0xffffff8000000000 - 0xffffff8008000000   (   128 MB)
+[    0.000000]     vmalloc : 0xffffff8008000000 - 0xffffffbdbfff0000   (   246 GB)
+[    0.000000]       .init : 0xffffff8008770000 - 0xffffff80087d0000   (   384 KB)
+[    0.000000]       .text : 0xffffff8008080000 - 0xffffff8008590000   (  5184 KB)
+[    0.000000]     .rodata : 0xffffff8008590000 - 0xffffff8008770000   (  1920 KB)
+[    0.000000]       .data : 0xffffff80087d0000 - 0xffffff8008837808   (   415 KB)
+[    0.000000]     fixed   : 0xffffffbffe7fb000 - 0xffffffbffec00000   (  4116 KB)
+[    0.000000]     PCI I/O : 0xffffffbffee00000 - 0xffffffbfffe00000   (    16 MB)
+[    0.000000]     memory  : 0xffffffc000200000 - 0xffffffc020000000   (   510 MB)
+[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+[    0.000000] Preemptible hierarchical RCU implementation.
+[    0.000000] 	Build-time adjustment of leaf fanout to 64.
+[    0.000000] NR_IRQS:64 nr_irqs:64 0
+[    0.000000] GIC: Using split EOI/Deactivate mode
+[    0.000000] Architected cp15 timer(s) running at 24.00MHz (phys).
+[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+[    0.000009] sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+[    0.001729] Console: colour dummy device 80x25
+[    0.001771] Calibrating delay loop (skipped), value calculated using timer frequency.. 48.00 BogoMIPS (lpj=24000)
+[    0.001796] pid_max: default: 32768 minimum: 301
+[    0.002013] Mount-cache hash table entries: 1024 (order: 1, 8192 bytes)
+[    0.002035] Mountpoint-cache hash table entries: 1024 (order: 1, 8192 bytes)
+[    0.003187] Initializing cgroup subsys devices
+[    0.003229] Initializing cgroup subsys freezer
+[    0.003781] sched-energy: CPU device node has no sched-energy-costs
+[    0.003805] Invalid sched_group_energy for CPU0
+[    0.003822] CPU0: update cpu_capacity 1024
+[    0.003896] ASID allocator initialised with 32768 entries
+[    0.015198] Detected VIPT I-cache on CPU1
+[    0.015275] Invalid sched_group_energy for CPU1
+[    0.015284] CPU1: update cpu_capacity 1024
+[    0.015291] CPU1: Booted secondary processor [410fd042]
+[    0.018263] Detected VIPT I-cache on CPU2
+[    0.018321] Invalid sched_group_energy for CPU2
+[    0.018330] CPU2: update cpu_capacity 1024
+[    0.018337] CPU2: Booted secondary processor [410fd042]
+[    0.021344] Detected VIPT I-cache on CPU3
+[    0.021400] Invalid sched_group_energy for CPU3
+[    0.021407] CPU3: update cpu_capacity 1024
+[    0.021414] CPU3: Booted secondary processor [410fd042]
+[    0.021557] Brought up 4 CPUs
+[    0.021646] SMP: Total of 4 processors activated.
+[    0.021668] CPU features: detected feature: 32-bit EL0 Support
+[    0.021690] CPU: All CPU(s) started at EL2
+[    0.022047] Invalid sched_group_energy for CPU3
+[    0.022073] Invalid sched_group_energy for Cluster3
+[    0.022089] Invalid sched_group_energy for CPU2
+[    0.022107] Invalid sched_group_energy for Cluster2
+[    0.022122] Invalid sched_group_energy for CPU1
+[    0.022140] Invalid sched_group_energy for Cluster1
+[    0.022155] Invalid sched_group_energy for CPU0
+[    0.022173] Invalid sched_group_energy for Cluster0
+[    0.023763] devtmpfs: initialized
+[    0.097975] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1911260446275000 ns
+[    0.098033] futex hash table entries: 1024 (order: 4, 65536 bytes)
+[    0.098928] pinctrl core: initialized pinctrl subsystem
+[    0.101731] NET: Registered protocol family 16
+[    0.108344] cpuidle: using governor menu
+[    0.108430] Registered FIQ tty driver
+[    0.108764] vdso: 2 pages (1 code @ ffffff8008596000, 1 data @ ffffff80087d4000)
+[    0.108833] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.109087] DMA: preallocated 256 KiB pool for atomic allocations
+[    0.188816] genirq: Setting trigger mode 8 for irq 170 failed (gic_set_type+0x0/0x48)
+[    0.191146] console [pstore-1] enabled
+[    0.191169] pstore: Registered ramoops as persistent store backend
+[    0.191192] ramoops: attached 0xa0000@0x8000000, ecc: 0/0
+[    0.242206] console [ttyFIQ0] enabled
+[    0.243275] Registered fiq debugger ttyFIQ0
+[    0.266390] rockchip-pm rockchip-suspend: not set pwm-regulator-config
+[    0.269351] vccio_sdio: regulator get failed, ret=-517
+[    0.270715] vccio_dvp: regulator get failed, ret=-517
+[    0.272110] vccio_flash: regulator get failed, ret=-517
+[    0.275349] iommu: Adding device ff440000.hevc_service to group 0
+[    0.276196] iommu: Adding device ff442000.vpu_service to group 1
+[    0.277018] iommu: Adding device ff460000.vop to group 2
+[    0.277762] iommu: Adding device ff4a0000.rkisp1 to group 3
+[    0.279862] rk_iommu ff440440.iommu: can't get sclk
+[    0.281182] rk_iommu ff442800.iommu: can't get sclk
+[    0.282181] rk_iommu ff460f00.iommu: can't get sclk
+[    0.283252] rk_iommu ff490800.iommu: can't get sclk
+[    0.284207] rk_iommu ff4a8000.iommu: can't get sclk
+[    0.285397] media: Linux media interface: v0.10
+[    0.286008] Linux video capture interface: v2.00
+[    0.289330] Advanced Linux Sound Architecture Driver Initialized.
+[    0.293953] rockchip-cpuinfo cpuinfo: Serial		: 543c9333f8324d3b
+[    0.295607] clocksource: Switched to clocksource arch_sys_counter
+[    0.330740] thermal thermal_zone1: power_allocator: sustainable_power will be estimated
+[    0.332103] NET: Registered protocol family 2
+[    0.333860] TCP established hash table entries: 4096 (order: 3, 32768 bytes)
+[    0.334627] TCP bind hash table entries: 4096 (order: 5, 131072 bytes)
+[    0.335389] TCP: Hash tables configured (established 4096 bind 4096)
+[    0.336130] UDP hash table entries: 256 (order: 2, 24576 bytes)
+[    0.336746] UDP-Lite hash table entries: 256 (order: 2, 24576 bytes)
+[    0.337911] NET: Registered protocol family 1
+[    0.341525] hw perfevents: enabled with armv8_cortex_a53 PMU driver, 7 counters available
+[    0.377541] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.385327] NET: Registered protocol family 38
+[    0.385892] io scheduler noop registered (default)
+[    0.389691] phy phy-ff2c0000.syscon:usb2-phy@100.1: Failed to get VBUS supply regulator
+[    0.397331] rk-vcodec vpu_combo: no regulator for vcodec
+[    0.398572] rk-vcodec vpu_combo: failed on clk_get clk_cabac
+[    0.399413] platform ff442000.vpu_service: probe device
+[    0.400787] platform ff442000.vpu_service: drm allocator with mmu enabled
+[    0.403474] platform ff440000.hevc_service: probe device
+[    0.404810] platform ff440000.hevc_service: drm allocator with mmu enabled
+[    0.406951] rk-vcodec vpu_combo: could not find power_model node
+[    0.407510] rk-vcodec vpu_combo: init success
+[    0.419772] dma-pl330 ff240000.dmac: Loaded driver for PL330 DMAC-241330
+[    0.420410] dma-pl330 ff240000.dmac: 	DBUFF-128x8bytes Num_Chans-8 Num_Peri-32 Num_Events-16
+[    0.422043] rockchip-pvtm ff010000.syscon:pmu-pvtm: failed to get rst 0 pmu
+[    0.423128] rockchip-pvtm ff148000.syscon:pvtm: failed to get rst 0 core
+[    0.425491] rockchip-system-monitor rockchip-system-monitor: system monitor probe
+[    0.427857] Serial: 8250/16550 driver, 6 ports, IRQ sharing disabled
+[    0.430145] ff030000.serial: ttyS0 at MMIO 0xff030000 (irq = 10, base_baud = 6250000) is a 16550A
+[    0.432681] ff178000.serial: ttyS5 at MMIO 0xff178000 (irq = 13, base_baud = 6250000) is a 16550A
+[    0.439316] random: nonblocking pool is initialized
+[    0.439648] [drm] Initialized drm 1.1.0 20060810
+[    0.442237] [drm] Rockchip DRM driver version: v1.0.1
+[    0.443310] rockchip-drm display-subsystem: devfreq is not set
+[    0.445564] rockchip-drm display-subsystem: bound ff460000.vop (ops 0xffffff80085eced0)
+[    0.446338] [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).
+[    0.446964] [drm] No driver support for vblank timestamp query.
+[    0.447753] rockchip-drm display-subsystem: failed to parse display resources
+[    0.449347] rockchip-drm display-subsystem: master bind failed: -22
+[    0.450022] rockchip-drm: probe of display-subsystem failed with error -22
+[    0.452110] mali ff400000.gpu: Failed to get regulator
+[    0.452620] mali ff400000.gpu: Power control initialization failed
+[    0.454311] Unable to detect cache hierarchy for CPU 0
+[    0.457114] zram: Added device: zram0
+[    0.457556] lkdtm: No crash points registered, enable through debugfs
+[    0.463532] Rockchip WiFi SYS interface (V1.00) ... 
+[    0.465077] ff300000.usb supply vusb_d not found, using dummy regulator
+[    0.465919] ff300000.usb supply vusb_a not found, using dummy regulator
+[    0.469096] dwc2 ff300000.usb: Configuration mismatch. dr_mode forced to device
+[    0.469822] dwc2 ff300000.usb: 128 invalid for host_nperio_tx_fifo_size. Check HW configuration.
+[    0.470637] dwc2 ff300000.usb: 256 invalid for host_perio_tx_fifo_size. Check HW configuration.
+[    0.471519] dwc2 ff300000.usb: EPs: 10, dedicated fifos, 972 entries in SPRAM
+[    0.475816] i2c /dev entries driver
+[    0.479870] rk808 0-0020: Pmic Chip id: 0x8090
+[    0.480844] rk808 0-0020: source: on=0x40, off=0x00
+[    0.482281] rk808 0-0020: support dcdc3 fb mode:-22, 510001152
+[    0.483191] rk808 0-0020: support pmic reset mode:0,1
+[    0.489748] rk808-regulator rk808-regulator: there is no dvs0 gpio
+[    0.490344] rk808-regulator rk808-regulator: there is no dvs1 gpio
+[    0.491269] DCDC_REG1: supplied by vcc5v0_sys
+[    0.494958] DCDC_REG2: supplied by vcc5v0_sys
+[    0.498479] DCDC_REG3: supplied by vcc5v0_sys
+[    0.501752] DCDC_REG4: supplied by vcc5v0_sys
+[    0.504648] vccio_sdio: supplied by vcc_3v0
+[    0.505827] DCDC_REG5: supplied by vcc5v0_sys
+[    0.508647] LDO_REG1: supplied by vcc3v3_sys
+[    0.512167] LDO_REG2: supplied by vcc3v3_sys
+[    0.515510] vccio_flash: supplied by vcc1v8_soc
+[    0.516525] LDO_REG3: supplied by vcc3v3_sys
+[    0.520042] LDO_REG4: supplied by vcc3v3_sys
+[    0.523569] LDO_REG5: supplied by vcc3v3_sys
+[    0.526222] LDO_REG6: supplied by vcc3v3_sys
+[    0.527372] vcc_sd: Bringing 3000000uV into 3300000-3300000uV
+[    0.530126] LDO_REG7: supplied by vcc3v3_sys
+[    0.532678] LDO_REG8: supplied by vcc3v3_sys
+[    0.534949] vccio_dvp: supplied by vcc1v8_dvp
+[    0.536844] LDO_REG9: supplied by vcc3v3_sys
+[    0.539436] SWITCH_REG1: supplied by vcc5v0_sys
+[    0.541879] SWITCH_REG2: supplied by vcc3v3_sys
+[    0.544742] rk817-battery rk817-battery: Failed to find matching dt id
+[    0.545929] rk817-charger rk817-charger: Failed to find matching dt id
+[    0.550209] input: rk8xx_pwrkey as /devices/platform/ff180000.i2c/i2c-0/0-0020/input/input0
+[    0.556900] rk808-rtc rk808-rtc: rtc core: registered rk808-rtc as rtc0
+[    0.559698] rk3x-i2c ff180000.i2c: Initialized RK3xxx I2C bus at ffffff8008aee000
+[    0.562895] rk3x-i2c ff1a0000.i2c: Initialized RK3xxx I2C bus at ffffff8008af0000
+[    0.565470] rkisp1 ff4a0000.rkisp1: rkisp1 driver version: v00.01.05
+[    0.579064] Boot mode: coldboot
+[    0.581278] rockchip-thermal ff280000.tsadc: Missing tshut mode property, using default (cru)
+[    0.582109] rockchip-thermal ff280000.tsadc: Missing tshut-polarity property, using default (low)
+[    0.583126] rk_tsadcv2_temp_to_code: Invalid conversion table: code=4095, temperature=2147483647
+[    0.584419] rockchip-thermal ff280000.tsadc: tsadc is probed successfully!
+[    0.587381] cpu cpu0: bin=0
+[    0.587791] cpu cpu0: leakage=9
+[    0.602324] cpu cpu0: temp=31818, pvtm=52402 (51898 + 504)
+[    0.604230] cpu cpu0: pvtm-volt-sel=1
+[    0.604876] cpu cpu0: bin-scale=13
+[    0.609099] cpu cpu0: avs=0
+[    0.609562] cpu cpu0: l=0 h=2147483647 hyst=5000 l_limit=0 h_limit=0
+[    0.612702] cpu cpu0: failed to find power_model node
+[    0.615934] Synopsys Designware Multimedia Card Interface Driver
+[    0.619004] dwmmc_rockchip ff380000.dwmmc: num-slots property not found, assuming 1 slot is available
+[    0.620071] dwmmc_rockchip ff380000.dwmmc: IDMAC supports 32-bit address mode.
+[    0.620810] dwmmc_rockchip ff380000.dwmmc: Using internal DMA controller.
+[    0.621438] dwmmc_rockchip ff380000.dwmmc: Version ID is 270a
+[    0.622138] dwmmc_rockchip ff380000.dwmmc: DW MMC controller at irq 21,32 bit host data width,256 deep fifo
+[    0.623214] dwmmc_rockchip ff380000.dwmmc: No vmmc regulator found
+[    0.623812] dwmmc_rockchip ff380000.dwmmc: No vqmmc regulator found
+[    0.624957] dwmmc_rockchip ff380000.dwmmc: allocated mmc-pwrseq
+[    0.639018] mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+[    0.652761] dwmmc_rockchip ff380000.dwmmc: 1 slots initialized
+[    0.654663] dwmmc_rockchip ff390000.dwmmc: IDMAC supports 32-bit address mode.
+[    0.655456] dwmmc_rockchip ff390000.dwmmc: Using internal DMA controller.
+[    0.656171] dwmmc_rockchip ff390000.dwmmc: Version ID is 270a
+[    0.656887] dwmmc_rockchip ff390000.dwmmc: DW MMC controller at irq 22,32 bit host data width,256 deep fifo
+[    0.657997] dwmmc_rockchip ff390000.dwmmc: No vmmc regulator found
+[    0.658569] dwmmc_rockchip ff390000.dwmmc: No vqmmc regulator found
+[    0.660540] dwmmc_rockchip ff380000.dwmmc: card claims to support voltages below defined range
+[    0.672860] mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+[    0.672893] mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
+[    0.674250] mmc0: new high speed SDIO card at address 0001
+[    0.687930] dwmmc_rockchip ff390000.dwmmc: 1 slots initialized
+[    0.696462] rockchip-dmc dmc: unable to get devfreq-event device : dfi
+[    0.699920] rknandc_base v1.1 2017-01-11
+[    0.708697] NET: Registered protocol family 17
+[    0.709254] NET: Registered protocol family 15
+[    0.709717] [WLAN_RFKILL]: Enter rfkill_wlan_init
+[    0.710939] [WLAN_RFKILL]: Enter rfkill_wlan_probe
+[    0.711421] [WLAN_RFKILL]: wlan_platdata_parse_dt: wifi_chip_type = rtl8189fs
+[    0.712101] [WLAN_RFKILL]: wlan_platdata_parse_dt: enable wifi power control.
+[    0.712805] [WLAN_RFKILL]: wlan_platdata_parse_dt: wifi power controled by gpio.
+[    0.713668] [WLAN_RFKILL]: wlan_platdata_parse_dt: get property: WIFI,host_wake_irq = 5, flags = 0.
+[    0.714508] [WLAN_RFKILL]: wlan_platdata_parse_dt: The ref_wifi_clk not found !
+[    0.715221] [WLAN_RFKILL]: rfkill_wlan_probe: init gpio
+[    0.715740] [WLAN_RFKILL]: Exit rfkill_wlan_probe
+[    0.716453] [BT_RFKILL]: Enter rfkill_rk_init
+[    0.718603] flash vendor_init_thread!
+[    0.718955] flash vendor storage:20170308 ret = -1
+[    0.719192] ov7251 2-0060: driver version: 00.01.01
+[    0.719403] ov7251 2-0060: Failed to get pwdn-gpios
+[    0.723572] ov7251 2-0060: Unexpected sensor id(000000), ret(-5)
+[    0.725614] Registered cp15_barrier emulation handler
+[    0.726172] Registered setend emulation handler
+[    0.730343] rga2: Driver loaded successfully ver:4.00
+[    0.731311] rga2: Module initialized.
+[    0.733729] mali ff400000.gpu: Failed to get leakage
+[    0.734721] mali ff400000.gpu: pvtm-volt-sel=1
+[    0.736378] mali ff400000.gpu: avs=0
+[    0.736823] W : [File] : drivers/gpu/arm/bifrost_for_linux/platform/rk/mali_kbase_config_rk.c; [Line] : 135; [Func] : kbase_platform_rk_init(); power-off-delay-ms not available.
+[    0.739668] mali ff400000.gpu: GPU identified as 0x3 arch 7.0.9 r0p0 status 0
+[    0.741907] mali ff400000.gpu: l=0 h=2147483647 hyst=5000 l_limit=0 h_limit=0
+[    0.743056] mali ff400000.gpu: Using configured power model mali-simple-power-model, and fallback mali-simple-power-model
+[    0.746242] mali ff400000.gpu: Probed as mali0
+[    0.748039] rockchip-dmc dmc: current ATF version 0x105!
+[    0.748541] rockchip-dmc dmc: read tf version 0x105!
+[    0.751967] rockchip-dmc dmc: Failed to get leakage
+[    0.752907] rockchip-dmc dmc: pvtm-volt-sel=1
+[    0.754627] rockchip-dmc dmc: avs=0
+[    0.755022] rockchip-dmc dmc: failed to get vop bandwidth to dmc rate
+[    0.755631] rockchip-dmc dmc: failed to get vop pn to msch rl
+[    0.756706] rockchip-dmc dmc: l=-2147483648 h=2147483647 hyst=0 l_limit=0 h_limit=0
+[    0.759562] devfreq dmc: Couldn't update frequency transition information.
+[    0.764122] asoc-simple-card rk809-sound: rk817-hifi <-> ff070000.i2s mapping ok
+[    0.764856] asoc-simple-card rk809-sound: ASoC: no source widget found for MICBIAS1
+[    0.765544] asoc-simple-card rk809-sound: ASoC: Failed to add route MICBIAS1 -> direct -> Mic Jack
+[    0.766360] asoc-simple-card rk809-sound: ASoC: no sink widget found for IN1P
+[    0.767018] asoc-simple-card rk809-sound: ASoC: Failed to add route Mic Jack -> direct -> IN1P
+[    0.767808] asoc-simple-card rk809-sound: ASoC: no source widget found for HPOL
+[    0.768469] asoc-simple-card rk809-sound: ASoC: Failed to add route HPOL -> direct -> Headphone Jack
+[    0.769302] asoc-simple-card rk809-sound: ASoC: no source widget found for HPOR
+[    0.769981] asoc-simple-card rk809-sound: ASoC: Failed to add route HPOR -> direct -> Headphone Jack
+[    0.773358] ov7251 2-0060: driver version: 00.01.01
+[    0.774114] ov7251 2-0060: Failed to get pwdn-gpios
+[    0.778408] ov7251 2-0060: Unexpected sensor id(000000), ret(-5)
+[    0.779165] mmc_host mmc1: Bus speed (slot 0) = 150000000Hz (slot req 150000000Hz, actual 150000000HZ div = 0)
+[    0.782877] input: gpio_keys as /devices/platform/gpio_keys/input/input1
+[    0.785546] ov7251 2-0060: driver version: 00.01.01
+[    0.786265] ov7251 2-0060: Failed to get pwdn-gpios
+[    0.786739] rk808-rtc rk808-rtc: setting system clock to 2017-08-05 09:00:01 UTC (1501923601)
+[    0.791263] ov7251 2-0060: Unexpected sensor id(000000), ret(-5)
+[    0.834320] vccio_sdio: disabling
+[    0.834685] vccio_dvp: disabling
+[    0.834983] vccio_flash: disabling
+[    0.835531] vccio_sd: disabling
+[    0.836277] vcc_sd: disabling
+[    0.837272] vcc3v3_lcd: disabling
+[    0.838073] rkisp1 ff4a0000.rkisp1: clear unready subdev num: 1
+[    0.839670] rockchip-mipi-dphy-rx: No link between dphy and sensor
+[    0.840239] rockchip-mipi-dphy-rx: No link between dphy and sensor
+[    0.840826] rkisp1: update sensor failed
+[    0.842306] ALSA device list:
+[    0.842633]   #0: rockchip,rk809-codec
+[    0.843372] Waiting for root device PARTUUID=614e0000-0000...
+[    1.044544] dwmmc_rockchip ff390000.dwmmc: Successfully tuned phase to 201
+[    1.045982] mmc1: new HS200 MMC card at address 0001
+[    1.049260] mmcblk1: mmc1:0001 004GA0 3.69 GiB 
+[    1.051320] mmcblk1boot0: mmc1:0001 004GA0 partition 1 2.00 MiB
+[    1.053376] mmcblk1boot1: mmc1:0001 004GA0 partition 2 2.00 MiB
+[    1.056357] mmcblk1rpmb: mmc1:0001 004GA0 partition 3 512 KiB
+[    1.069472]  mmcblk1: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10
+[    1.087421] ov7251 2-0060: driver version: 00.01.01
+[    1.088343] ov7251 2-0060: Failed to get pwdn-gpios
+[    1.094074] ov7251 2-0060: Unexpected sensor id(000000), ret(-5)
+[    1.154590] VFS: Mounted root (squashfs filesystem) readonly on device 179:8.
+[    1.159157] devtmpfs: mounted
+[    1.160118] Freeing unused kernel memory: 384K
+[    1.257758] vendor storage:20190527 ret = 0
+Starting logging: OK
+Welcome to Rockchip Linux SDK
+Populating /dev using udev: [    1.656776] udevd[139]: starting version 3.2.7
+[    1.681042] udevd[139]: specified group 'kvm' unknown
+[    1.700271] udevd[141]: starting eudev-3.2.7
+done
+read-only file system detected...done
+Will now mount all partitions in /etc/fstab
+Note: Create /.skip_fsck to skip fsck
+ - The check might take a while if didn't shutdown properly!
+Handling /dev/mmcblk1p8 / ext2 rw,noauto 1
+Wrong fs type(ext2) for /dev/mmcblk1p8
+Handling /dev/mmcblk1p3 /misc emmc defaults 0
+Unsupported file system emmc for /dev/mmcblk1p3
+Handling /dev/mmcblk1p7 /mnt/res ext2 defaults 2
+Checking /dev/mmcblk1p7(ext2)
+e2fsck 1.43.9 (8-Feb-2018)
+oem was not cleanly unmounted, check forced.
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+Free blocks count wrong (52685, counted=52684).
+Fix? yes
+
+Free inodes count wrong (17138, counted=17137).
+Fix? yes
+
+
+oem: ***** FILE SYSTEM WAS MODIFIED *****
+oem: 143/17280 files (23.8% non-contiguous), 70196/122880 blocks
+Mounting /dev/mmcblk1p7(ext2) on /mnt/res 
+[    3.318725] EXT4-fs (mmcblk1p7): couldn't mount as ext3 due to feature incompatibilities
+[    3.319984] EXT4-fs (mmcblk1p7): mounting ext2 file system using the ext4 subsystem
+[    3.324911] EXT4-fs (mmcblk1p7): mounted filesystem without journal. Opts: (null)
+Handling /dev/mmcblk1p10 /mnt/udisk ext2 defaults 2
+Checking /dev/mmcblk1p10(ext2)
+e2fsck 1.43.9 (8-Feb-2018)
+Superblock last mount time is in the future.
+	(by less than a day, probably due to the hardware clock being incorrectly set)
+Superblock last write time is in the future.
+	(by less than a day, probably due to the hardware clock being incorrectly set)
+userdata was not cleanly unmounted, check forced.
+Pass 1: Checking inodes, blocks, and sizes
+Pass 2: Checking directory structure
+Pass 3: Checking directory connectivity
+Pass 4: Checking reference counts
+Pass 5: Checking group summary information
+userdata: 157/160768 files (68.2% non-contiguous), 46622/2566124 blocks
+Mounting /dev/mmcblk1p10(ext2) on /mnt/udisk 
+[    5.456402] EXT4-fs (mmcblk1p10): couldn't mount as ext3 due to feature incompatibilities
+[    5.457461] EXT4-fs (mmcblk1p10): mounting ext2 file system using the ext4 subsystem
+[    5.469706] EXT4-fs (mmcblk1p10): mounted filesystem without journal. Opts: (null)
+Handling /dev/mmcblk1p9 /mnt/sys ext2 defaults 2
+Checking /dev/mmcblk1p9(ext2)
+e2fsck 1.43.9 (8-Feb-2018)
+sys: recovering journal
+sys: clean, 11/2304 files, 1405/10240 blocks
+Mounting /dev/mmcblk1p9(ext2) on /mnt/sys 
+[    5.692290] EXT4-fs (mmcblk1p9): couldn't mount as ext3 due to feature incompatibilities
+[    5.693960] EXT4-fs (mmcblk1p9): couldn't mount as ext2 due to feature incompatibilities
+[    5.699037] EXT4-fs (mmcblk1p9): mounted filesystem with ordered data mode. Opts: (null)
+Log saved to /tmp/mountall.log
+Starting network: OK
+Starting dhcpcd...
+no valid interfaces found
+no interfaces have a carrier
+forked to background, child pid 551
+Starting watch_ntpd.sh: OK
+Starting sshd: run ntpd once and watch it every 86400 seconds
+ 5 Aug 09:00:06 ntpd[563]: ntpd 4.2.8p10@1.3728-o Tue Jul  7 09:56:56 UTC 2020 (1): Starting
+ 5 Aug 09:00:06 ntpd[563]: Command line: ntpd -gq
+OK
+ 5 Aug 09:00:06 ntpd[563]: proto: precision = 0.583 usec (-21)
+ 5 Aug 09:00:06 ntpd[563]: restrict: ignoring line 11, address/host '[::1]' unusable.
+ 5 Aug 09:00:06 ntpd[563]: Listen and drop on 0 v4wildcard 0.0.0.0:123
+ 5 Aug 09:00:06 ntpd[563]: Listen normally on 1 lo 127.0.0.1:123
+ 5 Aug 09:00:06 ntpd[563]: Listening on routing socket on fd #18 for interface updates
+Debug: configfs_init
+mkdir: cannot create directory '/sys/kernel/config/usb_gadget/rockchip/functions/uac1.gs0': No such file or directory
+mkdir: cannot create directory '/sys/kernel/config/usb_gadget/rockchip/functions/uac2.gs0': No such file or directory
+[    6.071977] file system registered
+mkdir: cannot create directory '/sys/kernel/config/usb_gadget/rockchip/functions/mtp.gs0': No such file or directory
+mkdir: cannot create directory '/sys/kernel/config/usb_gadget/rockchip/functions/rndis.gs0': No such file or directory
+mkdir: cannot create directory '/sys/kernel/config/usb_gadget/rockchip/functions/acm.gs6': No such file or directory
+mkdir: cannot create directory '/sys/kernel/config/usb_gadget/rockchip/functions/mass_storage.0': No such file or directory
+[    6.186204] read descriptors
+[    6.186500] read strings
+[    7.205403] dwc2 ff300000.usb: bound driver configfs-gadget
+load wifi modules: WIFI_CHANNEL_PLAN=0x00
+[    7.420224] 
+[    7.420394] =======================================================
+[    7.421025] ==== Launching Wi-Fi driver! (Powered by Rockchip) ====
+[    7.421635] =======================================================
+[    7.422204] Realtek 8723DS SDIO WiFi driver (Powered by Rockchip,Ver v5.3.12_28613.20180703) init.
+[    7.423029] [WLAN_RFKILL]: rockchip_wifi_power: 1
+[    7.423453] [BT_RFKILL]: rfkill_get_bt_power_state: rfkill-bt driver has not Successful initialized
+[    7.424277] [WLAN_RFKILL]: wifi turn on power. -1
+[    7.424775] mmc0:mmc host rescan start!
+[    8.425686] [WLAN_RFKILL]: rockchip_wifi_get_oob_irq: Enter
+[    8.650483] ov7251 2-0060: driver version: 00.01.01
+[    8.651310] ov7251 2-0060: Failed to get pwdn-gpios
+[    8.660184] ov7251 2-0060: Unexpected sensor id(000000), ret(-5)
+Starting dnsmasq: OK
+[qfeel]===> set GPIO0_B5(for imu SENSOR_INIT) as input mode
+[qfeel]===> set GPIO3_D0 and GPIO3_D1 (fct and stresstest used) as input mode
+[qfeel]===> Find checkBootAuto.sh in dir:/usr/local
+
+
+Welcome to RK3326 Buildroot For Robot
+
+rk3326_robot64 login: <Roboeye_server path>: path:"/mnt/res/app"
+chmod: cannot access '/mnt/res/www/lighttpd': No such file or directory
+Start Normally
+appd OK
+[    9.969163] rtw_drv_log_level:0
+rebootUpload
+search cmd cat /mnt/udisk/tmp/log1/upload.cmd 
+Successfully initialized wpa_supplicant
+cat: /mnt/udisk/tmp/log1/upload.cmd: No such file or directory
+logPathDir /tmp/ ,fullPath
+file_udisk_bak 8
+regex:(\w+)MST::(\w+) 
+pbInputBase64 
+enable 0
+regex:(\w+)(\w+) 
+pbInputBase64 
+enable 0
+config size 2097152,log rotate size 5356324
+logFilter get msgId :0
+OK
+OK
+sh: you need to specify whom to kill
+sh: you need to specify whom to kill
+2017-08-05 09:00:11: (configfile.c.1390) server.upload-dirs doesn't exist: /mnt/sdcard/ 
+[   10.599539] rtw_drv_log_level:0
+[   11.094856] sh (754): drop_caches: 3
+Client mosq/rRt1uwd@HMw?TLZfeR sending CONNECT
+Client mosq/rRt1uwd@HMw?TLZfeR sending PUBLISH (d0, q0, r0, m1, '/viper/wifiOut', ... (11 bytes))
+Client mosq/rRt1uwd@HMw?TLZfeR received CONNACK
+Client mosq/rRt1uwd@HMw?TLZfeR sending SUBSCRIBE (Mid: 2, Topic: /viper/wifiIn, QoS: 2)
+Client mosq/rRt1uwd@HMw?TLZfeR received SUBACK
+Subscribed (mid: 2): 2
+Client mosq/rRt1uwd@HMw?TLZfeR sending PUBLISH (d0, q0, r0, m3, '/viper/wifiOut', ... (11 bytes))
+Client mosq/rRt1uwd@HMw?TLZfeR sending PUBLISH (d0, q0, r0, m4, '/viper/wifiOut', ... (11 bytes))
+Client mosq/rRt1uwd@HMw?TLZfeR received PUBLISH (d0, q0, r0, m0, '/viper/wifiIn', ... (37 bytes))
+/viper/wifiIn WiFiSSIDShark_RV1100A-NA-7c25da3a8043
+ 5 Aug 09:00:19 ntpd[563]: Listen normally on 2 wlan0 192.168.1.172:123
+13 May 07:57:48 ntpd[563]: Listen normally on 3 wlan0 192.168.1.171:123
+13 May 07:57:48 ntpd[563]: 138.197.15.27 local addr 192.168.1.172 -> 192.168.1.171
+13 May 07:57:48 ntpd[563]: 168.61.215.74 local addr 192.168.1.172 -> 192.168.1.171
+13 May 07:57:52 ntpd[563]: ntpd: time set +0.298956 s
+ntpd: time set +0.298956s
