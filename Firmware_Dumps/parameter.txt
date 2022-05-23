@@ -11,7 +11,7 @@ TYPE: GPT
 CMDLINE: mtdparts=
 rk29xxnand:
 #######################################################
-#		Multiply address values by 0x200       #
+#		Multiply address values by 0x200      #
 #######################################################
 0x00002000@0x00004000(uboot), U-Boot 2017.09 (Jul 07 2020 - 18:40:52 +0800)
 0x00002000@0x00006000(trust), v1.3(debug):ca3dd02 Built : 10:15:38, Sep 23 2019
