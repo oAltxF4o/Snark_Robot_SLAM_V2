@@ -1,0 +1,26 @@
+FIRMWARE_VER: 8.1
+MACHINE_MODEL: RK3326
+MACHINE_ID: 007
+MANUFACTURER: RK3326
+MAGIC: 0x5041524B
+ATAG: 0x00200800
+MACHINE: 3326
+CHECK_MASK: 0x80
+PWR_HLD: 0,0,A,0,1
+TYPE: GPT
+CMDLINE: mtdparts=
+rk29xxnand:
+#######################################################
+#		Multiply address values by 0x200              #
+#######################################################
+0x00002000@0x00004000(uboot), U-Boot 2017.09 (Jul 07 2020 - 18:40:52 +0800)
+0x00002000@0x00006000(trust), v1.3(debug):ca3dd02 Built : 10:15:38, Sep 23 2019
+0x00002000@0x00008000(misc),
+0x00010000@0x0000a000(boot), version (zxg@zxg) (gcc 6.3.1 20170404 (Linaro GCC.05) ) Linux 4.4.189 SMP PREEMPT Tue Jul 7 17:42:53 CST 2020, LINUX_2.6.39
+0x00010000@0x0001a000(recovery),
+0x00010000@0x0002a000(backup),
+0x0003C000@0x0003a000(oem),
+0x00200000@0x00076000(rootfs),
+0x00005000@0x00276000(sys),
+-@0x0027B000(userdata:grow)
+uuid:rootfs=614e0000-0000-4b53-8000-1d28000054a9
