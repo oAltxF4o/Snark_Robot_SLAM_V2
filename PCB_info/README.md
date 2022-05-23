@@ -1,4 +1,4 @@
-Most of the imformation I have on the L02 PCB comes from my previous work on the revere engineering the L01 PCB.
+Most of the information I have on the L02 PCB comes from my previous work on the revere engineering the L01 PCB.
 The header for connecting the the RVC base PCB is the same between both models.
 
 With the exception of the console UART, there are no test pads on the top side of the PCB. 
