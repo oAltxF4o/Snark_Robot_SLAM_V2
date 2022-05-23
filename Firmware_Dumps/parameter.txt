@@ -24,3 +24,6 @@ rk29xxnand:
 0x00005000@0x00276000(sys),
 -@0x0027B000(userdata:grow)
 uuid:rootfs=614e0000-0000-4b53-8000-1d28000054a9
+
+
+## This File has been modified to be clearer ##
