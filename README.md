@@ -10,7 +10,7 @@ This recovery mode is a basic ramfs utilizing busybox with minimally mounted par
 With the rootfs partition being squashfs I could not easy modifiy anything since it is mounted read-only. Kermit is not avaliable, and in this mode the WiFi interface is not avaliable. Manually copying and pasting that much data through the serial console does not sound like fun.
 In an attempt to get any sort of external storage to work,I made the system go borken!
 
-off to ebay, and $24 later, I have another on the way.
+A better place to keep up on progress is on my Hackaday blog here  https://hackaday.io/project/185493-shark-robot-vacuum-re-take-2-vslam-navigation
 
 
-------------------------------More to come soon-------------------------------------------------------------------------------------------
+
