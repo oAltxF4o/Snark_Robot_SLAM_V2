@@ -1,0 +1,30 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+
+
+
+
+
+
+
+
+
+
+
+message PbModulesStatus {                             /**< rpc request */
+  int32    id                 = 1;             /**< request id */
+
+}
+
+/** 外部模块检测请求 **/
+message PbModulesRequest                               /**< rpc acknowledge */
+{
+
+    int32  id                  = 1;
+    string name                = 2;
+    oneof  hasModulesInitSignal  { int32       modulesInitSignal = 40;} ///< init  modules signal                         模块升级信号
+    oneof  hasModulesCheckSignal { int32       modulesCheckSignal= 41;} ///< check modules status                         模块检测信号
+}
+

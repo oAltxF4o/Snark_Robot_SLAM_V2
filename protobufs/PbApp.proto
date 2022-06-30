@@ -1,0 +1,18 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+
+message SCMCleanStats {
+    
+	int32 startTime = 1;
+	int32 cleanTime = 2;
+	int32 cleanArea = 3;
+	int32 totalCleanArea = 4;
+	int32 TotalCleanTime = 5;
+	int32 isCleanFinished = 6;
+	int32 totalDustBinChangeCount = 7;
+	int32 totalCleanCount = 8;
+	int32 isLowLightReport = 9;
+}
+

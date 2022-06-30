@@ -1,0 +1,18 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+message PbRpcReq {                             /**< rpc request */
+  int32    id                 = 1;             /**< request id */
+  string   method             = 2;             /**< request method 请求方法名称*/
+  repeated string params      = 3;             /**< request param list */
+}
+
+message PbRpcAck                               /**< rpc acknowledge */
+{
+  int32 id                      = 1;           /**<  acknowledge id      确认id                   */
+  string result                 = 2;           /**<  acknowledge result  返回结果                  */
+  oneof hasError { string error = 3;}          /**<  acknowledge error   错误信息                  */
+  repeated string retParams     = 4;           /**<  acknowledge params  返回参数列表               */
+}
+

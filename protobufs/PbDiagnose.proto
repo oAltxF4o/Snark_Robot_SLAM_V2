@@ -1,0 +1,435 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+import "PbConsts.proto";
+
+enum DIAG_NOSE_VERSION    {
+     DIAG_NOSE_VERSION_NONE =  0;
+
+    /**
+     * init version 
+     */
+     DIAG_NOSE_VERSION_1_0  =  1;
+};
+
+enum DiagnoseEventType
+{
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1): initial pose calibrate success
+     * Pb_Toggle_OFF(2): initial pose calibrate failed
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+     */
+    DT_CAL_INITIAL_POSE_SUCCESS  = 0;
+
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1):  report when reloclization success
+     * Pb_Toggle_OFF(2): report when reloclization failed
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+    */
+    DT_RELOCAL_SUCCESS           = 1;
+
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1):  report when IMU cali success
+     * Pb_Toggle_OFF(2): report when IMU cali failed
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+    */
+    DT_IMU_SOFT_CALI_SUCCESS     = 2;
+
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1):  report when map save success
+     * Pb_Toggle_OFF(2): report when map save failed
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+    */
+    DT_MAP_SAVE_SUCCESS         = 3;
+
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1):  report when 2R function is enabled
+     * Pb_Toggle_OFF(2): report when 2R function is disabled
+     * Only report when config is changed or when power on;
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+    */
+    DT_2R_STATE                 = 4;
+
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1):  report when evacu & resume is enabled
+     * Pb_Toggle_OFF(2): report when evacu & resume is enabled failed
+     * Only report when config is changed or when power on;
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+    */
+    DT_ER_STATE                 = 5;
+
+    /**
+     * Type: <PbToggle>
+     * Pb_Toggle_ON(1):  report when clean GoZone cmd is received
+                         AND all floor param is accepted.
+     * Pb_Toggle_OFF(2): report when clean GoZone cmd is received;
+                         BUT all floor param is not paired.
+     * Only report when gozone cmd is received.
+     *
+     * ---------------------------------------------------------
+     * !!CAUTION!!
+     * Transport every time when this items is reported.
+     * DO NOT filted when the value is same with last one.
+     * ---------------------------------------------------------
+     *
+    */
+    DT_GNG_CMD_SUCCESS         = 6;
+
+    /**
+     * Type: <int32> 0-100
+     * Only report when clean mission is started
+    */
+    DT_PERSIST_VAL             = 7;
+
+    /**
+     * Type: <int32(RrInteruptCode)>
+     * Only report when clean mission is started
+    */
+    DT_2R_INTERUPT_CODE       = 8;
+
+    /**
+     * Type: <int32>
+     *
+    */
+    DT_VT_LM                  = 9;
+
+    /**
+     * Type: <int32>
+     *
+    */
+    DT_VT_CL                  = 10;
+
+    /**
+    * Type: <int32>
+    *
+    */
+    DT_VT_FCL                 = 11;
+
+    /**
+    * Type: <int32>
+    *
+    */
+    DT_VT_IMG_QUALITY         = 12;
+
+    /**
+    * Type: <int32> unit: seconds
+    *
+    */
+    DT_VT_DARK_TIME           = 13;
+
+    /**
+    * Type: <int32> unit: seconds
+    *
+    */
+    DT_VT_PICKUP_TIME         = 14;
+
+    /**
+    * Type: <int32> unit: seconds
+    *
+    */
+    DT_VT_SLIP_TIME           = 15;
+
+    /**
+     * Type: <int32> unit: seconds
+     * Only report when dock ends; only include the PP dock time
+    */
+    DT_TIME_PP_DOCK           = 16;
+
+    /**
+     * Type: <int32> unit: seconds
+     * Only report when dock ends; only cound base dock time
+    */
+    DT_TIME_BASE_DOCK         = 17;
+
+    /**
+     * Type: <int32(DockEventCode)>
+     * Only report when dock interrupt
+    */
+    DT_DOCK_CODE              = 18;
+
+    /**
+     * Type: <int32(ERRORCode)>
+     * Only report when error happen
+    */
+    DT_ERROR_CODE             = 19;
+
+
+    /**
+     * Type: <int32(STATECode)>
+     * Only report when mapEditState change
+    */
+    DT_STATE_CHANGE           = 20;
+
+
+    /**
+     * Type: <int32>
+     * Only report when map lock
+    */
+    DT_MAP_LOCK              = 21;
+
+
+    /**
+     * Type: <int32>
+     *
+    */
+    DT_GO_ZONE_NUM           = 22;
+
+    /**
+     * Type: <PbToggle>
+     *
+    */
+    DT_SLAM_WORK_BAD         = 23;
+
+    /**
+     * Type: <int32>
+     *
+    */
+    DT_LOAD_LMS              = 24;
+
+    /**
+     * Type: <int32>
+     *
+    */
+    DT_SAVE_LMS              = 25;
+
+    /**
+     * Type: <int32>
+     * Only report when mission complete
+    */
+    DT_VERSION_L01           = 26;
+
+    /**
+     * Type: <int32>
+     * Only report when mission complete
+    */
+    DT_VERSION_SCM           = 27;
+
+    /**
+     * Type: <int32>
+     * Only report when mission complete
+    */
+    DT_VERSION_MCU           = 28;
+
+    /**
+     * Type: <int32(WarningCodeT)>
+     * Only report when error happen
+    */
+    DT_WARNING_CODE           = 29;
+
+    /**
+     * Type: <int32>
+     *
+    */
+    DT_MM_STATUS             = 30;
+
+};
+
+enum RrInteruptCode
+{
+    RR_ST_NONE                 = 0;
+
+    /**
+     * robot successfull got resume to clean
+     *
+     */
+    RR_SUCCESS                 = 1;
+
+    /**
+     * robot failed got resume to clean;
+     * because of error the robot during the docking and put it to charging
+     *
+     */
+    RR_INT_ERROR2CHARGE        = 2;
+
+    /**
+     * robot failed got resume to clean;
+     * because of pause the robot during the docking and put it to charging
+     *
+     */
+    RR_INT_PAUSE2CHARGE        = 3;
+
+    /**
+     * robot failed got resume to clean;
+     * because of user control dock
+     *
+     */
+    RR_INT_USR_CTR_DOCK        = 4;
+
+    /**
+     * robot failed got resume to clean;
+     * because of re-dock failed
+     *
+     */
+    RR_INT_REDOCK_FAILED       = 5;
+
+    /**
+     * robot failed got resume to clean;
+     * because of special error when docking
+     *
+     */
+    RR_INT_SPECIAL_ERROR       = 6;
+
+    /**
+     * robot failed got resume to clean;
+     * because of disable recharge resume function
+     *
+     */
+    RR_INT_SETTING_CHANGE      = 7;
+
+    /**
+     * robot failed got resume to clean;
+     * because of user control stop
+     *
+     */
+    RR_INT_USR_CTR_STOP        = 8;
+
+    /**
+     * robot failed got resume to clean;
+     * because of upgrade failed
+     *
+     */
+    RR_INT_UPGRADE_FAILED      = 9;
+};
+
+
+enum DockEventCode
+{
+    DE_NONE               = 0;
+
+    /**
+     * robot go to dock; because of evacuate resume
+     * only report when robot go to dock; because of evacuate resume
+     */
+    DE_ER                 = 1;
+
+    /**
+     * robot go to dock; because of recharge resume
+     * only report when robot go to dock; because of recharge resume
+     */
+    DE_2R                 = 2;
+
+    /**
+     * robot go to dock; because of battery low
+     * only report when robot go to dock; because of battery low
+     */
+    DE_BAT_LOW            = 3;
+
+    /**
+     * robot go to dock; because of escape failed
+     * only report when robot go to dock; because of escape failed
+     */
+    DE_ESC_FAILED         = 4;
+
+    /**
+     * robot go to dock; because of relocation failed
+     * only report when robot go to dock; because of relocation failed
+     */
+    DE_RELOC_FAILED       = 5;
+
+    /**
+     * robot go to dock; because of re-dock
+     * only report when robot go to dock; because of re-dock
+     */
+    DE_REDOCK             = 6;
+
+    /**
+     * robot go to dock; because of user control dock
+     * only report when robot go to dock; because of user control dock
+     */
+    DE_USR_CTR_DOCK       = 7;
+
+    /**
+     * robot go to dock; because of clean finish
+     * only report when robot go to dock; because of clean finish
+     */
+    DE_CLEAN_FINISH       = 8;
+};
+
+enum VtDiagInfo
+{
+    /**
+     * basic data of VT
+     * report once every 5 minutes
+     */
+    VD_CLOSE_LOOPS        = 0;
+    VD_FAULT_CLOSE_LOOPS  = 1;
+    VD_LMS                = 2;
+    VD_IMG_QUALITY        = 3;
+    VD_SUM_DARK_TIME      = 4;
+    VD_SUM_SLIP_TIME      = 5;
+};
+
+enum MMStatus{
+    MM_STATUS_ALLRIGHT      = 0;
+    MM_STATUS_FIRSTCLEAN    = 1;
+    MM_STATUS_TRAINING      = 2;
+    MM_STATUS_NOTTRAINING   = 3;
+    MM_STATUS_AREASMALL     = 4;
+    MM_STATUS_RESETFLOOR1   = 5;
+    MM_STATUS_RESETFLOOR2   = 6;
+    MM_STATUS_SIMILARCHECK1 = 7;
+    MM_STATUS_SIMILARCHECK2 = 8;
+    MM_STATUS_SIMILARCHECK3 = 9;
+    MM_STATUS_REPLACESUCC   = 10;
+    MM_STATUS_NOTFROMSTATION = 11;
+    MM_STATUS_LOWLIGHT       = 12;
+    MM_STATUS_NOTFINISH      = 13;
+    MM_STATUS_NOTEFFIENCY    = 14;
+
+    MM_STATUS_EMPTYLIST     = 100;
+    MM_STATUS_REBUILD       = 200;
+};
+
+message PbDiagnoseInfo
+{
+    DiagnoseEventType msgType        = 1;
+    int32             paramDefault   = 2;
+    repeated int32    paramIntArray  = 3;
+    repeated string   paramStrArray  = 4;
+    repeated string   jsonStrArray   = 5;
+}
+
+
+

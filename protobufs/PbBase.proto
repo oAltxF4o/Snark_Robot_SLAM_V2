@@ -1,0 +1,43 @@
+/******************************************************************
+ * Items ONLY for Robot Base, NOT related to IOT
+ * Mainly used for BaseController, other module does not care this
+ ******************************************************************/
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+
+/*import "PbConsts.proto";*/
+import "PbMessages.proto";
+
+
+/** information used for PbInput **/
+message PbBaseInput
+{
+     int32 battery         = 1;                                    /**< 0-100, 0: empty 100: nealy full                         */
+     oneof hasBumpered       { int32     bumpered          = 2;}   /**< Bumper signal                                           */
+     oneof hasCliffed        { int32     cliffed           = 3;}   /**< Cliff  signal                                           */
+     oneof hasMagnetCliff    { int32     magnetTrigger     = 4;}   /**< magnet signal                                          */
+     oneof hasWaterLevel     { int32     waterLevel        = 5;}   /**< water tank level                                       */
+     oneof hasDockCode       { int32     dockCode          = 6;}   /**< docker  code, reference:PbConsts.proto, app can ignore */
+     oneof hasChargeStatus   { int32     chargeStatus      = 7;}   /**< cleaning speed, rarely used                             */
+     oneof hasRobotKey       { int32     robotKey          = 8;}   /**< 机器人按键信号                                            */
+     oneof hasBDPSignal      { string    BDPSignal         = 9;}   /**< bdp test signal                         app can ignore */
+}
+
+/** information used for PbOutput. Mean to change Base behavior.
+  * mainly used for BaseController, other module does not care this
+**/
+message PbBaseOutput
+{
+    oneof hasTwist           { PbTwist   twist             = 1;}   ///< speed to motor   底盘速度
+    oneof hasBaseCmd         { int32     baseCmd           = 2;}   ///< Base work command                            工作状态
+    oneof hasFanSpeed        { int32     fanSpeed          = 3;}   /**< suction fan speed control 0-100                         */
+    oneof hasPumpSpeed       { int32     pumpSpeed         = 4;}   /**< Pump speed.0-100                                        */
+    oneof hasRollBrushSpeed  { int32     rollBrushSpeed    = 5;}   /**< roll brush speed .0-100                                        */
+    oneof hasSideBrushSpeed  { int32     sideBrushSpeed    = 6;}   /**< side brush speed.0-100                                        */
+    oneof hasCleanSpeed      { int32     cleanSpeed        = 7;}   /**< cleaning speed, rarely used                             */
+    oneof hasForceWifiLedOn  { bool      forceWifiLedOn    = 9;}   ///
+    // oneof hasWipeMotorSpeed  { int32     wipeMotorSpeed    = 8;}   /**< ???                                                     */
+}
+

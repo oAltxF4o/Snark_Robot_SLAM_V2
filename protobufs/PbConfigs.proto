@@ -1,0 +1,70 @@
+/***************************************************************
+ *
+ * Mainly for APP to change setting on the robot. once the
+ * robot received config setting, robot will record it on disk
+ * and load setting next time.
+ *
+ * Caution: for CleanMode config, we can disable the auto save
+ * function, so every time the robot start clean, it always use
+ * auto mode.
+ *
+ ***************************************************************/
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+import "PbConsts.proto";
+import "PbMessages.proto";
+
+
+
+/** 对于状态机是单纯的输入 仅用来设置。*/
+message PbConfig
+{
+
+     oneof hasCleanMode          {
+          /**  set working mode for robot                              *
+           *   e.g fan/pump/move speed                                 */
+          PbCleanMode cleanMode        = 1; }
+
+     oneof hasVolumeCtr          {
+          /**  set volume. 0-100                                       */
+          int32       volume           = 2; }
+
+     oneof hasCleanSpeedCtr      {
+          /**  cleaning speed, rarely used                             */
+          int32       cleanSpeed       = 3; }
+
+     oneof hasLanguagePkg        {
+         /**< language package, every send would trigger a new download*/
+          string    languagePkg        = 4; }
+
+     oneof hasSchedule           {
+         /**< set Time Appointment strategy       策略数据             */
+          PbSchedule scheduleData      = 6; }
+
+     oneof hasAEDEnable          {
+         /**< enable AED mode, 1: enable 2: disable              */
+          PbToggleT AEDModeEnable     = 7; }
+
+     oneof hasRREnable           {
+         /**< enable Recharge & Resume function */
+          PbToggleT RRModeEnable      = 8; }
+
+     oneof hasSetBoxLife         {
+         /**< if BoxLifeMode is one, robot would clean infinitly */
+          PbToggleT boxLifeMode       = 9; }
+
+
+     oneof hasTimeZone           {
+         /**< set TimeZone such as +8 -1 etc. */ 
+          int32     timeZone = 10; }
+
+     oneof hasNapTime{
+         /**< set heart beat time, unit is second 
+          *  when wifi is never configed, this should be a large number(disable nap function)
+          *  when wifi is configed, set the time you want in seconds. e.g for Ali, should be 240s
+          */ 
+          int32     napTime  = 11; }
+}
+

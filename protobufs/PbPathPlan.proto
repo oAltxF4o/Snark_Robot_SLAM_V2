@@ -1,0 +1,38 @@
+/******************************************************************
+ * PathPlan status.
+ * e.g. robot motion is escaping/wake street/along wall.
+ * and also finish flags for cleaning;
+ ******************************************************************/
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+import "PbConsts.proto";
+/* import "PbMessages.proto"; */
+message PPInput
+{
+    int32  reserved =1;
+}
+
+message PPOutput
+{
+    oneof hasCleanFinish       { PbToggleT                cleanFinish    = 1;} ///< clean finished or abort                      清扫结束
+    oneof hasMoveFinish        { PbToggleT                moveFinish     = 2;} ///< (reserved) move to point finished            移动结束
+    oneof hasRectFinish        { PbToggleT                rectFinish     = 3;} ///< (reserved) rect clean finished               矩形清扫结束
+    oneof hasPPMotionState     { PathPlanningMotionT ppMotionState=4;} ///< PathPlan Motion(snaking,escaping,follow wall)PP状态
+
+//   oneof hasMovePostion        { bytes     movePostion             = 27;}   /**< navi robot to a specified position on map ,
+//                                                                             *   not available yet, data format: XXYY, 4 bytes long
+//                                                                             *   XX is a int16 number, range from -32767 ~ 32767,
+//                                                                             *   unit is 2mm, stand for X in word cord, YY is the same.
+//                                                                             *   e.g. XX=100,YY=-100, means (0.2m, -0.2m) in word cord
+//                                                                             *   移动到指定位置，每两个byte组成一个距离数据(int16),
+//                                                                             *   每两个点组成一个坐标(x,y)，共四个字节                        */
+//   oneof hasRectClean          { bytes     rectRectClean           = 28;}   /**< specify a area on map to clean, not available yet,
+//                                                                             *   data format: XXYYXXYY, 4 bytes long.
+//                                                                             *   first  XXYY is point left-top corner coordinate
+//                                                                             *   second XXYY is point right-bottom corner coordinate
+//                                                                             *   矩形打扫，每两个byte组成一个距离数据(int16),
+//                                                                             *   每两个点组成一个坐标(x,y),共八个字节，左上点右下               */
+//   repeated                     PbFloor floors                     = 53;    /**<  todo                                                  */
+//   repeated                     Region regions                     = 47;    /**< deprecated ,regions to clean                           */
+}

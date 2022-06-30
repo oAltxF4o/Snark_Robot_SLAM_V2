@@ -1,0 +1,23 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+//import "PbConsts.proto";
+import "PbMessages.proto";
+
+message PbRangePoint{
+   float x  = 1;
+   float y  = 2;  
+   float st = 3;  ///> strength of the lidar point
+}
+
+message PbScan {
+    string                 frame_name   = 1;
+    int32                  frame_id     = 2;
+    PbPose2Df              frame_pose   = 3;
+
+    /**
+     *range points coordinates that have been transformed to global map frame
+    */
+    repeated  PbRangePoint rangePoints  = 4;
+}

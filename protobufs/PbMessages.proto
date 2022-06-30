@@ -1,0 +1,105 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+import "PbConsts.proto";
+
+
+message PbTwist                                  /**< speed send to base, cannot get value from app */
+{
+    float         linearSpeed        = 1;        /**< linear  speed Unit m/s                        */
+    float         angularSpeed       = 2;        /**< angular speed Unit rad/s                      */
+    oneof hasID { int32  id          = 3;}       /**< optional id, should always increase;*/
+}
+
+message PbPoint2Df                                /**< Point(x,y) in 2D */
+{
+    float         x                  = 1;        /**< Unit m                                        */
+    float         y                  = 2;        /**< Unit m                                        */
+    oneof hasID { int32  id          = 3;}
+}
+
+message PbPose2Df                                /**< Pose(x,y,theta) in 2D */
+{
+    float         x                  = 1;        /**< Unit m                                        */
+    float         y                  = 2;        /**< Unit m                                        */
+    float         theta              = 3;        /**< Unit rad                                      */
+    oneof hasID { int32  id          = 4;}
+}
+
+
+/**< content format Pls see Doc:TimeAppointment.pdf*/
+message PbSchedule
+{
+
+    /**< PbStategyOp shown above                       */
+    ScheduleOpT   opType             = 1;
+
+    /**< all strategies are converted to one string    */
+    string        time               = 2;
+
+    // Base64 of pbinput, can be null for simple clean!;
+    string        action             = 3;
+}
+
+
+/************************************
+ * 透传消息，周期性上报，如果APP连接，每隔
+ * 15s进行一次上报。对于状态机只读，透传
+ ************************************/
+message PbDeviceInfo{
+    oneof hasWifiStatus         { WifiStatusT wifiState         = 1; }     /**<TODO:???? wifi status      wifi状态                                */
+    oneof hasWifiQuality        { int32       wifiLinkQuality   = 2; }     ///< WIFI质量
+    oneof hasWifiSignalLevel    { int32       wifiSignalLevel   = 3; }     ///< WIFI信号
+    oneof hasNetPingStatus      { int32       netPing           = 4; }     ///< ping 延时
+    oneof hasNetState           { int32       netState          = 5; }     /**< Cloud Net mapEditState;        */
+
+    oneof hasBattery            { int32       battery           = 8; }     ///< battery volume                               输出电量
+    oneof hasWaterLevel         { int32       waterLevel        = 9; }     ///< water level left, mainly for app             水箱剩余水量
+    oneof hasDustLevel          { int32       dustLevel         = 10;}     ///< water level left, mainly for app             水箱剩余水量
+    oneof hasTemperature        { int32       temperature       = 11;}     /**<  温度  temperature                                      */
+
+    oneof hasUTCTime            { int32       utcTime           = 16;}     /**< 系统时间                                                */
+    string    IPAddress         = 17;                                      /**< Device IP Address in local net                          */
+    string    languagePkg       = 18;                                      /**< Language Pack name, e.g. cn/en/jp etc. 语言包名称         */
+    oneof hasMemFree            { int32       memFreeKB           = 19;}     /**< MemFree                                               */
+}
+
+
+
+
+
+
+message PbWakeUpInfo                           /**<                                               */
+{
+    WakeUpTypeT   wakeUpType         = 1;             /**< wake up type                                  */
+    int32         wakeUpTime         = 2;             /**< (deprecated)                                  */
+}
+
+/***********************************************
+ *  电机的工作模式，同时出现在PbInput和output中。
+ *  input中出现在的PbConfig 类型中，表示设置模式。
+ *  output中直接出现在PbOutput中，表示现在使用的模式。
+ *  input一般只设置一次，但是每个周期都有output。
+ *  output有时会和设置不同（比如cali，dock等模式）
+ *  注意区分PbBaseOutput，那个是实际数据，给base使用。
+ ***********************************************/
+message PbCleanMode {
+  CleanModeT             mode                         = 1;
+  oneof hasFanSpeed  {    int32       fanSpeed        = 2;}
+  oneof hasPumpSpeed {    int32       pumpSpeed       = 3;}
+}
+
+/* Zone list is the brief report of all zone and nogozone hashes.
+   used to set clean task 
+*/
+message FloorControlParams{
+  
+  /* hash id of floor                  */
+  string floorHash                   = 3;
+  repeated string goZoneHashs        = 1;
+  repeated string nogoZoneHashs      = 2;
+  repeated string floorsLists        = 4;
+  repeated int32  candidateIDs       = 5;
+}
+

@@ -1,0 +1,161 @@
+/******************************************************************
+ * Total Input for all interface.
+ * All Controller and App/Iot should use this file as message.
+ * !**Note**! For App/Iot, the message may be **Base64** format
+ ******************************************************************/
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+import "PbConsts.proto";
+import "PbMessages.proto";
+import "PbBase.proto";
+import "PbConfigs.proto";
+import "PbDebug.proto";
+import "PbMap.proto";
+/* import "PbModules.proto"; */
+import "PbNetwork.proto";
+import "PbPathPlan.proto";
+import "PbRpc.proto";
+import "PbVisualTracker.proto";
+
+/** All information the StateMachine needed is provide here.
+ *  Pls notice that for QUICK a hands-on with IOT, **NOT ALL PbInputs's Members are needed**.
+ *  Important Items are listed in front, and trivial Items are listed behind.
+ */
+message PbInput
+{
+    /** message ID,int32, increasing but not succession         */
+    int32                 msgID     = 1;
+
+    PbVersionT            version   = 2;
+
+    /** power on time, unit /s 上电时间                           */
+    float                 timeStamp = 3;
+
+    /** Error code,  reference: PbConsts.proto                 */
+    repeated ErrorCodeT   errorCodes= 4;
+
+    /** warning code, reference:PbConsts.proto                 */
+    repeated WarningCodeT warnCodes = 5;
+
+    repeated PbFloor      mapSetting= 6;
+
+    oneof hasConfig{
+
+        /** config info, reference:PbConfig.proto                 */
+        PbConfig     config         = 7;
+    }
+
+    oneof hasDeviceInfo{
+
+        /** config info, reference:PbConfig.proto                 */
+        PbDeviceInfo deviceInfo     = 8;
+    }
+
+    oneof hasAppConnected{
+
+        /**< if App is Open, App should send this every 4s
+        *   if robot missing this signal for 10s, robot will
+        *   disconnect, and no RT map will be send                  */
+        PbToggleT    appConnected   = 9;
+    }
+
+    oneof hasNetConfig{
+
+        /**< Wifi password etc., Only available in WifiConfig Mode   *
+        *   Before this Message send, network card is in AP Mode,   *
+        *   this message will trigger mapEditState machine to wait signal: *
+        *   App_Connected, after then network is success;           */
+        PbNetConfig  netConfig      = 10;
+    }
+
+    oneof hasUserCtr{
+        /** basic control signal, reference: PbConsts.proto        */
+        UserCtrlSignalT UserCtr     = 16;
+    }
+
+    /**************************** advanced attributes *********************/
+
+    oneof hasDeviceProfile{
+
+        /**< device info, upload once app is connected               */
+        PbDeviceProfile deviceProfile     = 24;
+    }
+    oneof hasAudioPlay{
+
+        /// robot would play Audio_ID, if ID!=0
+        int32         audioID       = 25;
+    }
+
+    oneof hasOTAInfo            {
+
+        /** Ota information  reference: PbMessage.proto             */
+        PbOTAInfo     otaInfo       = 26;
+    }
+
+    oneof hasUploadStartInfo    {
+
+        /**< ??? 上传开机信息                                         */
+        PbToggleT   uploadStartInfo   = 27;
+
+    }
+
+    oneof hasTwistCtr           {
+        /** speed to motor   app遥控速度                             */
+         PbTwist   twist             = 28;
+    }
+
+    oneof hasStateSignal        {
+         StateSignalT stateSignal    = 29;
+    }
+
+    oneof hasPPInput            {
+         PPInput       ppInput       = 33;
+    }
+
+    oneof hasVTInput            {
+         VTInput       vtInput       = 34;
+    }
+
+    oneof hasRpcRequest         {
+
+        /**< rpc  request, reference:PbConsts.proto                 */
+        PbRpcReq  rpcRequest        = 35;
+    }
+
+    oneof hasDebugSetting       {
+
+        /**< send debug setting, app can ignore                      */
+        PbDbgSetting debugSetting   = 36;
+    }
+
+    oneof hasBaseInput          {
+         PbBaseInput  baseInput      = 37;
+    }
+
+    oneof hasWakeUpInfo         {
+        /**< wake up type and info, app can ignore  唤醒信息           */
+        PbWakeUpInfo wakeUpInfo     = 38;
+    }
+
+    oneof hasFloorControl{
+        FloorControlT floorControl  = 39;
+    }
+
+    oneof hasAudioFile{
+        string audioFile            = 40;
+    }
+
+    oneof hasFloorControlParams{
+	FloorControlParams floorControlParams = 41; 
+    }
+    oneof hasDnDToggle{
+
+        /**<  
+        * DND toggle
+        *                     */
+        PbToggleT    DnDToggle = 42;
+    }
+
+}

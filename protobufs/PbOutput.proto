@@ -1,0 +1,236 @@
+/******************************************************************
+ * Total Output for all interface.
+ * All Controller and App/Iot should use this file as message.
+ * !**Note**! For App/Iot, the message may be **Base64** format
+ ******************************************************************/
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+import "PbConsts.proto";
+import "PbMessages.proto";
+import "PbBase.proto";
+import "PbDebug.proto";
+import "PbMap.proto";
+import "PbModules.proto";
+import "PbNetwork.proto";
+import "PbPathPlan.proto";
+import "PbRpc.proto";
+import "PbVisualTracker.proto";
+import "PbConfigs.proto";
+import "PbDiagnose.proto"; 
+package pb;
+
+
+message PbOutput
+{
+    /** frame counter,   计数器    */
+    int32                 msgID       = 1;
+    PbVersionT            version     = 2;
+
+    /** priority         优先级    */
+    PriorityT             priority    = 3;
+
+    /** robot mode       机器状态  */
+    SysStateT             robotState  = 4;
+
+    /** error codes                             下发错误>    */
+    repeated ErrorCodeT   errorCodes  = 5;
+
+    /** warning codes                           下发警告>     */
+    repeated WarningCodeT warnCodes   = 6;
+
+
+    /** map output 输出的地图     */
+    repeated  PbFloor     mapOut      = 7;
+
+    oneof hasConfig{
+
+        /** config info, reference:PbConfig.proto                 */
+        PbConfig     config           = 8;
+    }
+
+
+    oneof hasDeviceInfo{
+
+        /** device info                                           */
+        PbDeviceInfo deviceInfo       = 9;
+    }
+
+
+    oneof hasAppConnected{
+
+        /** if App is Open, App should send this every 4s
+         *   if robot missing this signal for 10s, robot will
+         *   disconnect, and no RT map will be send                */
+        PbToggleT appConnected        = 10;
+    }
+
+
+    oneof hasNetConfig         {
+
+        /**< Wifi password etc., Only available in WifiConfig Mode   *
+         *   Before this Message send, network card is in AP Mode,   *
+         *   this message will trigger mapEditState machine to wait signal: *
+         *   App_Connected, after then network is success;           */
+        PbNetConfig  netConfig        = 11;
+    }
+
+
+    oneof hasDeviceProfile{
+
+        /**< device info, upload once app is connected               */
+        PbDeviceProfile deviceProfile = 12;
+    }
+
+
+    oneof hasAudioPlay         {
+
+        /** robot would play Audio_ID, if ID!=0                     */
+        int32        audioID          = 13;
+    }
+
+    oneof hasOTAInfo           {
+
+        /** Ota information  reference: PbMessage.proto             */
+        PbOTAInfo    otaInfo          = 14;
+    }
+
+/******** 配对 **************/
+    oneof hasBaseOutput        {
+        PbBaseOutput baseControl      = 16;
+    }
+
+    oneof hasPPOutput          {
+        PPOutput    ppOutput          = 17;
+    }
+
+    oneof hasVTOutput          {
+        VTOutput    vtOutput          = 18;
+    }
+
+    oneof hasRpcAck            {
+
+        /// RPC request return result(rarely used)
+        PbRpcAck    rpcAck            = 19;
+    }
+
+    oneof hasDbgInfo           {
+
+        /// debug info output                            调试信息
+        PbDbgInfo   dbgInfo           = 20;
+    }
+
+    oneof hasStateSignal        {
+
+	
+         StateSignalT stateSignal    = 21;
+    }
+
+
+
+
+/*********** 特殊 *************/
+    oneof hasWifiCtr           {
+        ///  WIFI_RESET                                   1/WIFI开始配网  2/WIFI链接
+        WifiCtrT    wifiCtr           = 24;
+    }
+
+    oneof hasPowerCtr          {
+        ///  TODO power management signal;                     电源管理指令
+        int32       powerCtr          = 25;
+    }
+
+    oneof hasPowerOffSignal    {
+
+        ///  **DEPRECATED** TODO 删掉一个 PowerOff signal to Base ??? use CMD instead? ???关机信号
+        PbToggleT  powerOffSignal    = 26;
+    }
+
+    oneof hasMapUpdateOk       {
+
+        ///  地图区域清扫设置成功
+        PbToggleT  mapUpdateOk       = 27;
+    }
+
+    oneof hasCurrentLanguagePkg{
+
+        string      currentLanguagePkg= 28;
+    }
+
+    oneof hasModulesOutput     {
+
+        /**< modules info, reference:PbModules.proto                 */
+        PbModulesRequest modulesRequest = 29;
+    }
+
+    oneof hasAudioFile{
+        string audioFile            = 30;
+    }
+
+    oneof hasFloorControl{
+        FloorControlT floorControl  = 31;
+    }
+
+    oneof hasFloorControlParams{
+	FloorControlParams floorControlParams = 32; 
+    }
+
+    oneof hasDnDToggle{
+
+        /**<  
+        * DND toggle
+        *                     */
+        PbToggleT    DnDToggle = 33;
+    }        
+
+    repeated PbDiagnoseInfo diagnoseInfo = 34; 
+
+    oneof hasRRToggle{
+
+        /**< only functional when robot is in WAITING/DOCKING mode.
+        *  when RRToggle is OFF/NONE means robot is not in RR
+        *  when RRToggle is ON means robot is during a RR 
+        *  flag will change to ON when cleaned for setted time(1hour) and dock to recharge.
+        *  flag will change to OFF shen robot is charged full(or 4hour), and resume to clean. 
+        **/
+        PbToggleT    RRStatus= 35;
+    }        
+
+    oneof hasERToggle{
+
+        /**< only functional when robot is in DOCKING mode.
+        *  when ERToggle is OFF/NONE means robot is not in RR
+        *  when ERToggle is ON means robot is during a RR
+        *  flag will change to ON when cleaned for setted time(0.5 hour) and dock to evacuation.
+        *  flag will change to OFF when evacuation is finished, and resume to clean. 
+        **/
+        PbToggleT    ERStatus= 36;
+    }        
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,2972 @@
+/**
+ *   This file defines some of basic concepts
+ *   e.g. signal name / status name / error etc.
+ *   Here is some basic rules for whole project; which is EZ confused.
+ *
+ *   WARN_xxx:  normally cause a warning message. normally not stop
+ *              cleaning but can affect robot behavier.
+ *   Error_xxx: normally stop cleaning.
+ *
+ *   TANK : means water tank. e.g. WARN_TANK_LOW
+ *   DUST : means dust bin.   e.g. WARN_DUST_FULL
+ *   ROLL : means Main Roller Brush under the robot;
+ *   PUMP : means Water Pump in water tank
+ *   FAN  : means SUCTION Fan Motor.
+ *   IR   : means Infrared Radiation Approach Sensor. Not TOF. not cliff
+ *   TOF  : means TOF sensor.
+ *   CLIFF: Cliff Sensor Only report 0/1. include TOF & IR
+ *   REMOTE: means Encoded Singal; used for DOCK or REMOTE CONTROLLER
+ *   SIDE BRUSH: means the side brushed in front of robot.
+ *   SCHEDULE: time appointment
+ *   OTA  : robot upgrade mode; instead of update;upgrade
+ *
+ *   Modes relatied:
+ *   Waiting: means WaitMode/StandbyMode.
+ *
+ *   Modes operation:
+ *   For any modes; it may have following operation:
+ *   START  : Modes start. E.g. AUDIO_CLEAN_START
+ *   PAUSE  : Modes paused by USR_CTR_PAUSE. May can continue.
+ *   RESUME : Modes resume. E.g. AUDIO_CLEAN_RESUME
+ *   STOPPED: Modes is stopped/interrupted by error / signal.
+ *           NOT finished! E.g. AUDIO_CLEAN_STOPPED
+ *   FINISH : 1. Modes is stopped when it's done; and exit normally. 2.Or success
+ *   FAILED : Modes is stopped when it cannot done.
+ *   ATTENTION! Modes have one or more operations; but not all are needed!
+ *
+ *   说明：
+ *   此文件包含了程序中使用的大部分基础定义： 包含 错误/控制/状态等。
+ *   同时为了规范命名;防止概念混淆，我们使用了一些规范：
+ *
+ *   WARN_xxx: 警告信息，通常不停止清洁，但会影响机器人运动
+ *   Error_xxx: 错误信息，通常会停止机器人动作。
+ *
+ *   TANK : 代指水箱， SIG_EXT_INSERT_TANK 水箱插入信号
+ *   DUST : 代指尘盒 E.g. WARN_DUST_FULL 尘盒满警告
+ *   ROLL : 代指中刷、滚刷、主刷
+ *   PUMP : 代指水泵
+ *   FAN  : 代指风机，
+ *   IR   : 红外接近传感器，不是TOF和Cliff
+ *   TOF  : TOF sensor.
+ *   CLIFF: 只汇报0、1，悬崖传感器，包括TOF和CLIFF
+ *   REMOTE: 编码后的红外信号，只代指遥控器和充电桩信号
+ *   SCHEDULE: 预约定时
+ *   SIDE BRUSH: 边刷
+ *
+ *   模式相关的概念:
+ *   Waiting: 待机模式.
+ *
+ *
+ *   模式相关的操作
+ *   For any modes; it may have following operation:
+ *   START  : 开始某一模式. E.g. AUDIO_CLEAN_START
+ *   PAUSE  : 暂停模式，一般是用户控制. 部分可以继续.
+ *   RESUME : 恢复/继续. E.g. AUDIO_CLEAN_RESUME
+ *   STOPPED: 模式被异常中断。不是正常结束。 E.g. AUDIO_CLEAN_STOPPED
+ *   FINISH : 1. 模式正常结束. 2. 成功
+ *   FAILED : 非正常结束.
+ *   ATTENTION! 注意！
+ *   每个模式有上面的几个操作，不一定会全都有。
+ *   现阶段已知问题：
+ *   1. 中文语音的表示不一致，如果 清洁工作开始 结束局部清洁，这类动宾搭配。
+ *   2. 英文语音部分意义含糊。
+ *   3. 清洁有暂停，继续的语音。但是回充只有暂停
+ *   4. 没有抹布未安装的错误
+ *   5. 需要增加关机状态下无法充电的错误
+ *   6. 没有震动电机卡住的语音
+ *   7. ERROR_CANNOT_FINISH_CLEAN 没有对应语音
+ *   8. ERROR_VIBRATOR_MOTOR_STUCK 没有对应语音
+ *   9. ERROR_PUMP_BROCKEN 没有对应语音
+ **/
+
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+
+/**
+ * To save proto's payload; we denotes verison with only one char.
+ * In program we use
+ *   (pbinput.version > PB_VER2XXX) to check Version.
+ *   if true; it means the protocol may be not compitable.
+ */
+enum PbVersionT{
+    PB_VERSION_NONE          =  0;
+
+    /** Mar.9.2019  initial version
+     *  this is initial version of new protocol.
+     *  version lock should be done on Mar.11.
+     *  Any change about protocol would list here.
+     */
+            PB_VER2_0                =  20;
+
+    /**
+     *Mar.25:
+     *    1.add hardware wifi version & bootloader version
+     *    2.add floor control;
+     *    3.add isDefault in PbFloor
+     *Mar.24: 1. add enable signal type for protobuf
+     *Mar.20: 1. add credit for map
+     *Mar.19:
+     *    1. add MapMeasure for PbFloor used to evaluate Map Goodness.
+     *    2. ADD WARNING_RELOC_FAILED (ERROR_RELOC_FAILED is still exit);
+     *    3. add mapPersist for PbFloor
+     *    4. add AEDModeEnable && RRModeEnable  to PbConfig
+     *    5. update: vt map summary
+     *    6. add MapMeasure for map goodness evaluation.
+     *Mar.16: 1. add DeviceProfile: hardware info;
+     *Mar.14: 1. add docs: How to use RTC.md
+     *Mar.13: 1. add suction mode (silent normal MAX) 2. add MapVtSummary 3. add Changelog; 4. add VTPP transform in map
+     **/
+            PB_VER2_1                =  21;
+
+    /**
+     *Mar.26
+     *    1. add IMU cali command for VT control
+     *    2. add playAudioFile in pbinput
+     *    3. add PbToggleT to instead of bool type
+     **/
+            Pb_VER2_2                =  22;
+
+    /**
+     * add forllowing signal for OTA and Sleep
+     *      SIG_EXT_OTA_PROCESS_START
+     *      SIG_EXT_OTA_PROCESS_ABORT
+     *      SIG_INT_SLEEP_AWAKE
+     *      SIG_EXT_HEART_BEAT_OK
+     */
+            Pb_VER2_3                =  23;
+
+    /**
+     * add flag to indicate when to do temp calibration
+     */
+            Pb_VER2_4                =  24;
+
+
+    /**
+     * 1. add following signal to pbinput
+     *      SIG_INT_SHUT_DOWN
+     *      SIG_INT_REBOOT
+     *      SIG_INT_RESTART
+     * 2. add StateSignal for PbOutput;
+     * 3. add BDP DP DH Version
+     *
+     */
+            Pb_VER2_5                =  25;
+
+    /**
+     *
+     * 1. add some OTA_SIG_ in ota signal
+     * 2. add floorControl to PbOutput
+     * 3. add SIG_OTA_SUCCESS
+     */
+            Pb_VER2_6                =  26;
+
+    /**
+     * 1. add SIG_INTER_PM_REQ_SLEEP
+     * 2. add SIG_INTER_PM_PERMIT_SLEEP
+     * 3. add BoxLifeMode in PbConfig
+     * 4. add TimeZone Set in PbConfig
+     * Caution! TimeZone currently is only used for IMU Calibration!!
+     * 5. add error:ssid_not_found; error:hall; error: encoder;error:wifi no internet
+     */
+            Pb_VER2_7                =  27;
+
+    /**
+     *add:
+     * AUDIO_WIFI_SSID_NOT_FOUND;
+     * AUDIO_WIFI_NO_INTERNET   ;
+     * AUDIO_WIFI_NO_SERVICE    ;
+     * AUDIO_CLIFF_START_FAIL;
+     * AUDIO_WHEEL_DROP_START_FAIL;
+     * AUDIO_ENDATA_ERROR;
+     * AUDIO_BOUNDARY_ERR;
+     * ERROR_CLIFF_START_FAIL
+     * ERROR_WHEEL_DROP_START_FAIL
+     * ERROR_ENDATA
+     * ERROR_BOUNDARY
+     **/
+            Pb_VER2_8                =  28;
+
+    /**
+     * change:
+     *   SIG_INTER_PM_REQ_SLEEP    => SIG_INT_PM_REQ_SLEEP
+     *   SIG_INTER_PM_PERMIT_SLEEP => SIG_INT_PM_PERMIT_SLEEP
+     * add:
+     *   SIG_INT_BDP_REQ_SSID      signal send from StateMachine To SCM; to get SSID for BDP
+     *   PbNetConfig.bdpssid       return string from SCM.
+     *   PbZone.enable             denote whether the zone is enabled.
+     *   MapData.updateCount       denote how many times the floor have been updated.
+     *   MapMeasureRetT            internal usage; for logic how to update map
+     *   USR_CTR_AGING_TEST        aging test mode; internal usage
+     *   SIG_EXT_MAP_CLEAR_ALL     user delete all persist map
+     *   PbFloor.cleanCounter      how many times the map have been cleaned
+     *   MM_UPDATE_VT
+     *   MM_UPDATE_LIST
+     **/
+            Pb_VER2_9                =  29;
+
+    /**
+     * add:
+     *   change ZoneList ==> FloorControlParams
+     *   FloorControlParams for both PbInput and PbOutput
+     *   PbNetconfig.dsnInfo for Device serial number
+     **/
+            Pb_VER3_0                =  30;
+
+    /**
+     * add:
+     *   add chargeStationPose for PbMapData
+     *   add oneof chargeStationPose
+     *   add errorPoselist     for PbFloor
+     *   add PbMap.shapeScore
+     *   update warning code: warn_wifi_...  with error_wifi...
+     *   add wifistatus: wifi_disconnect
+     **/
+            Pb_VER3_1                =  31;
+
+    /**
+     * add:
+     *   add ModuleName  in PbNetwork.deviceprofile
+     *   add USR_CTR_WARMBOOT
+     *   add WARN_CAMERA_WRONG
+     **/
+            Pb_VER3_2                =  32;
+
+    /**
+     * add:
+     *   add mem free in device info
+     *   add SYS_ST_WAITING_2R_PENDING
+     *   add SYS_ST_WAITING_2R
+     *   update remove useless ERROR; and add new one.
+     *   add candidateMaps in PbFloor.MapMesare
+     *   add following into PbMapData
+     *      - ID
+     *      - failedCounts
+     *      - realCredit
+     *      - lmDensity
+     *      - lmStability
+     *   add heatMaps into MapMeasure
+     *   add RR sig used to communicate with app
+     *      - SIG_INT_REQ_2R_PERMIT
+     *      - SIG_EXT_ENABLE_2R_ONCE
+     *      - SIG_EXT_SET_2R_PENDING
+     *      - SIG_INT_2R_OP_DENIED
+     *      - SIG_INT_FLOOR_CTR_DENIED
+     *      - SIG_INT_FLOOR_CTR_ACCEPTED
+     *   add ERROR_GNG_ZONE_CLEAN_FAILED.
+     *   add verison for PbFloor
+     *   add DnDtoggle for PbInput&PbOutput
+     *   add signal to FloorControlT:
+     *      - FL_CTR_CANDIDATE_MERGE
+     *      - FL_CTR_CANDIDATE_DELETE
+     *      - FL_CTR_CANDIDATE_THUMB_UP
+     *      - FL_CTR_CANDIDATE_THUMB_DOWN
+     *      - FL_CTR_CANDIDATE_RESET
+     *      - FL_CTR_CANDIDATE_LOCK
+     *   add candidateIDs to FloorControlParams
+     *   add PbMap.isNewCandidate
+     *   add PbFloor.isLocked
+     **/
+     Pb_VER3_3                =  33;
+
+    /**
+     *   fix: some comments for PbMap; map default unit from 0.07->0.08;
+     *   add: lidar data in PbLidar
+     *   add: MapDataType; e.g. MDT_LIDAR_MAP MDT_HEAT_MAP 
+     *   add: MapDataType for MapData
+     **/
+     Pb_VER3_4                =  34;
+
+    /**
+     *  add: hasRRToggle&&RRToggle into PbOutput.
+     *  add: hasERToggle&&ERToggle into PbOutput.
+     *  add: ERROR$WARN with poses into PbErrorPose.
+     *  add: extended info string(json).
+     **/
+     Pb_VER3_5                =  35;
+
+
+    PB_VER_MAX               =  36;
+};
+
+enum SysStateT{
+    /** NONE MODE
+     *  This Mode should never show when robot  *
+     *  is running; once you got this. you can  *
+     *  USE LAST SysStateT VALUE instead        */
+            SYS_ST_NONE                  =  0;
+
+    /** 系统未初始化
+     *  System not Inited. Rarely seen after    *
+     *  system boot up                          */
+            SYS_ST_UNINIT                =  1;
+
+    /** 睡眠状态
+     *  System is in Sleep status. this means:  *
+     *  1. Sys is trying to sleep.              *
+     *  2. Sys is just recover                  *
+     *  3. Sys is in IotHearBeat mode           */
+            SYS_ST_SLEEPING              =  2;
+
+    /** 等待状态/待机状态
+     *  WaitingMode(StandByMode):               *
+     *  first status after booting.             *
+     *  have 3 sub status;SYS_ST_WIFI_CONFIG;   *
+     *  SYS_ST_CHARGING;SYS_ST_BATTERY_FULL.    *
+     *  Wifi_config have highest priority.      *
+     *  e.g. when robot charging on dock and    *
+     *  received USR_CTR_WIFI_RESET.            *
+     *  SysState would change from CHARGING/FULL*
+     *  to WIFI_CONFIG                          */
+            SYS_ST_WAITING               =  3;
+
+    /** 暂停状态
+     *  Pause Mode ;                            *
+     *  Only achieved from DOCKING and CLEANING *
+     *  mode; other working mode cannot pause   */
+            SYS_ST_PAUSE                 =  4;
+
+    /** 系统异常
+     *  Error Mode                              */
+            SYS_ST_ERROR 	             =  5;
+
+    /** 打扫状态
+     *  Clean Mode                              */
+            SYS_ST_CLEANING              =  6;
+
+    /** 回充状态
+     *  Dock Mode                               */
+            SYS_ST_DOCKING               =  7;
+
+    /** 定点清扫
+     *  Spot Mode                               *
+     *  Note: there is NO PAUSE mode in spot    *
+     *  mode. USR_CTR_PAUSE would trigger       *
+     *  SYS_ST_WAITING                          */
+            SYS_ST_SPOTING               =  8;
+
+    /** 沿墙模式
+     * Along wall mode                          *
+     * not functional temporarily               */
+            SYS_ST_ALONG_WALL            =  9;
+
+    /** 收到遥控信号处于遥控状态
+     * remote control mode;                     *
+     * caused by USR_CTR_TWIST/UP/DOWN/RIGHT/LEFT*/
+            SYS_ST_REMOTE                = 10;
+
+    /** 升级状态
+     *  Robot is updating                       *
+     *  Note: Iot would disconnect after        *
+     *  download and md5check                   */
+            SYS_ST_UPDATING              = 11;
+
+    /** WIFI设置
+     * Robot is configuring wifi                *
+     * sub mode of waiting                      */
+            SYS_ST_WIFI_CONFIG           = 12;
+
+    /** 充电中
+     *  charging mode;                          *
+     *  sub mode of waiting                     */
+            SYS_ST_CHARGING              = 13;
+
+    /** 电池满
+     * Robot is charged;                        *
+     * sub mode of waiting                      */
+            SYS_ST_BATTERY_FULL	         = 14;
+
+    /** 指哪到哪
+     * Go to Specified point                    *
+     * not functional currently                 */
+            SYS_ST_GO_TARGET             = 15;
+
+    /** 局部清扫
+     * Clean with specified Zone                */
+            SYS_ST_CLEAN_ZONE            = 16;
+
+    /** 正在重启
+     *  preparing to reboot                     */
+            SYS_ST_REBOOT                = 17;
+
+    /** 正在关机
+     *  robot is powering off                   */
+            SYS_ST_POWEROFF              = 18;
+
+    /** 网络连接成功
+     *  (RARELY USED)                           */
+            SYS_ST_WIFI_CONNECTED        = 19;
+
+    /** 跑机测试
+     *  SRS run test                            */
+            SYS_ST_TEST                  = 20;
+
+    /** BDP test                                */
+            SYS_ST_FACTORY_TEST          = 21;
+
+    /** Special Case of WAITING:
+     *  robot is in 2R State; and resume is not granted
+     *  SIG_EXT_ENABLE_CURRENT_2R can permit to SYS_ST_WAITING_2R
+     *  */
+            SYS_ST_WAITING_2R_PENDING = 22;
+
+    /** Special Case of WAITING:
+     *  robot is in 2R State; and resume is granted
+     *  SIG_EXT_CANCEL_CURRENT_2R can exit to SYS_ST_WAITING_2R_PENDING
+     *  */
+            SYS_ST_WAITING_2R             = 23;
+
+    /** SYS ST NUMBERS                          */
+            MAX_SYS_ST_NUM               = 24;
+};
+
+
+enum WarningCodeT{
+    /** No warning                              */
+            WARN_NONE                    = 0;
+
+    /** 电池电量低 注意，用的少，一般不会停止清扫。
+     * Battery low; normally wont stop clean    */
+            WARN_BATTERY_LOW             = 1;
+
+    /** 尘盒满
+     *  trigger: QERR_DUST_FULL
+     *  Dust tank full          q                 */
+            WARN_DUST_FULL               = 2;
+
+    /** 水箱为空
+     *  trigger: QERR_TANK_EMPTY
+     *  Water tank is empty                      */
+            WARN_TANK_EMPTY              = 3;
+
+    /** 光线强度弱
+     *  low light for a while                   */
+            WARN_LOW_LIGHT               = 4;
+
+    /** 光线强度非常弱
+     *  very low light; use IMU ONLY to navi    */
+            WARN_NO_LIGHT                = 5;
+
+    /** 长时间没有回环
+     *  cannot loop closure for a long time     */
+            WARN_UNLOOPCLOSE             = 6;
+
+    /** 完全打滑（完全废弃）
+     *  Deprecated                              */
+            WARN_WHEEL_FLY               = 7;
+
+    /** 轮子打滑
+     * robot slid;                              *
+     * would cause robot back off               */
+            WARN_WHEEL_SLIP              = 8;
+
+    /** 机器倾斜
+     * robot incline;                           *
+     * would cause robot back off               */
+            WARN_INCLINE				 = 9;
+
+    /** 危险区域
+     * not functional temporarily               */
+            WARN_DANGEROUS_ZONE          = 10;
+
+    /** VT 数据错误
+     * VisualTracker Abnormal                   *
+     * (RARELY USED) reserved internal warning  *
+     * for VisualTracker;                       */
+            WARN_VT_LOST_LOCALIZATION    = 11;
+
+    /** 无法重定位成功，继续清扫
+     *                                          */
+            WARN_VT_RELOC_FAILED         = 12;
+
+    /** 镜头脏了
+     *  lens id dirty; need clean               */
+            WARN_LENS_DIRTY              = 13;
+
+    /** path plan cannot find docker            */
+            WARN_PP_NO_DOCK              = 14;
+
+    /** 水箱水少 注意:水空了这件事情为warn3号。
+     *  Water tank low                          *
+     *  Note: this is different with Warning#3  */
+            WARN_TANK_LOW                = 15;
+
+    /**
+     * warn cannot connect wifi                 */
+            WARN_WIFI_CONFIG_TIMEOUT     = 16;
+
+    /**
+     * warn the password is wrong               */
+            WARN_WIFI_AUTH_FAILED        = 17;
+
+    /**
+     * warn the ssid can not find               */
+            WARN_WIFI_SSID_NOT_FOUND     = 18;
+
+    /**
+     * warn cannot connect the internet         */
+            WARN_WIFI_NO_INTERNET        = 19;
+
+    /**
+     * LED for MCU                              */
+            WARN_FIND_ME                 = 20;
+
+    /**
+     * warn for Camera can not receive image    */
+            WARN_CAMERA_RUN              = 21;
+
+    /**
+     * recharge resume open                     */
+            WARN_RECHARGE_RESUME_OPEN    = 22;
+
+    /**
+     * recharge resume close                    */
+            WARN_RECHARGE_RESUME_CLOSE   = 23;
+
+    /**
+     * wheel over current    */
+            WARN_WHEEL_OVER_CURRENT      = 24;
+
+    /**
+    * evaucation resume open                     */
+            WARN_EVAUCATION_RESUME_OPEN  = 25;
+
+    /**
+
+     * evaucation resume close                   */
+            WARN_EVAUCATION_RESUME_CLOSE = 26;
+
+    /**
+     * save map busy                             */
+            WARN_SAVE_MAP_BUSY           = 27;
+
+    /**
+     * escape failed                             */
+            WARN_ESCAPE_FAILED           = 28;
+
+    /**
+     * pick up                                  */
+            WARN_PICK_UP                 = 29;
+
+    /*
+     * fan roll motor over current               */
+            WARN_OVER_CURRENT            = 30;
+
+            WARN_MM_ALLRIGHT           = 31;
+            WARN_MM_FIRSTCLEAN         = 32;
+            WARN_MM_TRAINING           = 33;
+            WARN_MM_NOTTRAINING        = 34;
+            WARN_MM_AREASMALL          = 35;
+            WARN_MM_RESETFLOOR1        = 36;
+            WARN_MM_RESETFLOOR2        = 37;
+            WARN_MM_SIMILARCHECK1      = 38;
+            WARN_MM_SIMILARCHECK2      = 39;
+            WARN_MM_SIMILARCHECK3      = 40;
+            WARN_MM_REPLACESUCC        = 41;
+            WARN_MM_NOTFROMSTATION     = 42;
+            WARN_MM_LOWLIGHT           = 43;
+            WARN_MM_NOTFINISH          = 44;
+            WARN_MM_NOTEFFIENCY        = 45;
+
+    /** WARN NUMBERS                            */
+            MAX_WARN_NUM                 = 46;
+
+};
+
+
+enum ErrorCodeT{
+    /**  ERROR None;default value               */
+            ERROR_NONE                   =  0;
+
+    /** WIFI初始化失败
+     *  Wifi module init failed                 */
+            ERROR_INIT_WIFI              =  1;
+
+    /** IMU初始化失败
+     *  IMU module init failed                  */
+            ERROR_INIT_IMU               =  2;
+
+    /** CAMERA初始化失败
+     *  Camera module init failed               */
+
+            ERROR_INIT_CAM               =  3;
+
+    /** RVC初始化错误
+     *  RVC module init failed                  */
+            ERROR_INIT_RVC               =  4;
+
+    /** Optical flow
+     *  Optical flow sensor init failed                  */
+            ERROR_INIT_OPTIC             =  5;
+
+    /**
+     *  trigger: QERR_
+     *                                          */
+            ERROR_ENDATA                 =  6;
+
+    /** 霍尔传感器错误
+     *  trigger: QERR_
+     *  Hall Sensor data abnormal               */
+            ERROR_DATA_HALL              =  7;
+
+    /** 墙检红外传感器错误
+     *  trigger: QERR_IR
+     *  IR data abnormal                        */
+            ERROR_DATA_IR                =  8;
+
+    /** 地检红外传感器错误
+     *  trigger: QERR_CLIFF
+     *  Cliff data abnormal; need clean sensor  */
+            ERROR_DATA_CLIFF             =  9;
+
+    /** 碰撞传感器错误
+     *  trigger: QERR_BUMPER
+     *  Bumper data abnormal                    */
+            ERROR_DATA_BUMPER            = 10;
+
+    /** IMU传感器数据错误
+     *  Imu data abnormal                       */
+            ERROR_DATA_IMU               = 11;
+
+    /** CAMERA传感器数据错误
+     *  Camera data cannot read                 */
+            ERROR_DATA_CAM               = 12;
+
+    /** 沿墙传感器数据错误
+     *  trigger: QERR_TOF_DATA
+     *  Tof data abnormal; need clean seneor    */
+            ERROR_DATA_TOF               = 13;
+
+    /** 没有下位机数据一段时间
+     *  Rvc data cannot read for a while.       */
+            ERROR_DATA_RVC               = 14;
+
+
+
+
+    /** 左轮悬空错误
+     *  trigger: QERR_WHEEL_DROP_L
+     *  left wheel drop.                         *
+     *  when wheel drop; Base(MCU) would try to  *
+     *  fix this error first; when failed robot  *
+     *  will then get this error                 */
+            ERROR_WHEEL_DROP_L           = 16;
+
+    /** 右轮悬空错误
+     *  trigger: QERR_WHEEL_DROP_R
+     *  left wheel drop;                         *
+     *  when wheel drop; Base(MCU) would try to  *
+     *  fix this error first; when failed robot  *
+     *  will then get this error                 */
+            ERROR_WHEEL_DROP_R           = 17;
+
+    /** 两个轮子同时抬起
+     *  both wheels drop; stop immediately       */
+            ERROR_WHEEL_DROP_BOTH        = 18;
+
+    /** 左驱动轮卡死错误
+     *  trigger: QERR_DRIVE_MOTOR_L_BLOCK
+     *  left wheel stuck;                        *
+     *  when wheel stuck; Base(MCU) would try to *
+     *  fix this error first; when failed robot  *
+     *  will then get this error                 */
+            ERROR_WHEEL_STUCK_L          = 19;
+
+    /** 右驱动轮卡死错误
+     *  trigger: QERR_DRIVE_MOTOR_R_BLOCK
+     *  right wheel stuck;                       *
+     *  when wheel stuck; Base(MCU) would try to *
+     *  fix this error first; when failed robot  *
+     *  will then get this error                 */
+            ERROR_WHEEL_STUCK_R          = 20;
+
+
+    /** 两个轮子同时卡住
+     *  both wheels stuck; stop immediately      */
+            ERROR_WHEEL_STUCK_BOTH       = 21;
+
+    /** 风机错误
+     *  trigger: QERR_FAN_BLOCK
+     *  suction fan error                       */
+            ERROR_FAN_STUCK              = 22;
+
+    /** 风机坏了
+     *  trigger: QERR_FAN_ERR
+     *  suction fan broken; NOT Data error;      *
+     *  e.g short/open circuit                   */
+            ERROR_FAN_BROCKEN            = 23;
+
+    /** 左边刷卡死错误
+     *  trigger: QERR_SFRONT_WHEEL_L_BLOCK
+     *  left side brush stuck;                   *
+     *  when side brush stuck; Base(MCU) would   *
+     *  try to fix this error first; when failed *
+     *  robot will then get this error           */
+            ERROR_SFRONT_WHEEL_STUCK_L     = 24;
+
+    /** 右边刷卡死错误
+     *  trigger: QERR_SFRONT_WHEEL_R_BLOCK
+     *  right side brush stuck;                  *
+     *  when side brush stuck; Base(MCU) would   *
+     *  try to fix this error first; when failed *
+     *  robot will then get this error           */
+            ERROR_SFRONT_WHEEL_STUCK_R     = 25;
+
+    /** 两个边刷同时卡住
+     * both side brushes stuck; stop immediately*/
+            ERROR_SFRONT_WHEEL_STUCK_BOTH  = 26;
+
+    /** 滚刷卡死错误
+     *  trigger: QERR_FLOOR_BRUSH_BLOCK
+     *  rot brush stuck                          */
+            ERROR_RFRONT_WHEEL_STUCK       = 27;
+
+    /** 震动器卡住
+     *  trigger: QERR_VIBRATOR_MOTOR_BLOCK
+     *  Vibrator motor suck; used for ping   *
+     *  robot                                   */
+            ERROR_VIBRATOR_MOTOR_STUCK   = 28;
+
+    /** 水箱电机卡住
+     *  trigger: QERR_PUMP_MOTOR_BLOCK
+     *  Pump motor suck (used for mopping robot)*/
+            ERROR_PUMP_STUCK             = 29;
+
+    /** 边刷坏了（短路/短路）
+     *  trigger: QERR_SIDE_BRUSH_ERR
+     *  side brush broken; NOT Data error;       *
+     *  e.g short/open circuit                   */
+            ERROR_SFRONT_WHEEL_BROCKEN     = 30;
+
+    /** 滚刷坏了
+     *  trigger: QERR_FLOOR_BRUSH_ERR
+     *  rot brush broken; NOT Data error;        *
+     *  e.g short/open circuit                   */
+            ERROR_RFRONT_WHEEL_BROCKEN     = 31;
+
+    /** ???? 是否增加 bumper/wall brocken 相关的错误; 只有电机类的brocken错误*/
+
+    /** 按钮被按下15s
+     *  trigger: QERR_BUTTON_ERR
+     *  button broken; e.g triggered for 15s     */
+            ERROR_BUTTON_BROCKEN         = 32;
+
+    /** 水泵坏了
+     *  pump broken    */
+            ERROR_PUMP_BROCKEN           = 33;
+
+
+    /** 电池错误;电池未检测到，温度过高/过放/关机充电
+     *  trigger: QERR_BATTERY_ERR
+     *  Battery error
+     *  normally caused by battery not installed;*
+     *  battery temp too high; or charge when    *
+     *  power off                                */
+            ERROR_BATTERY_ABNORMAL       = 40;
+
+    /** 电池电量过低
+     *  trigger: QERR_BATTERY_LOW
+     *  Battery lower than critical value; must  *
+     *  charge immediately; cannot do any thing. *
+     *  Note to compare with Error#59            */
+            ERROR_BATTERY_CRITICAL_LOW   = 41;
+
+    /** 电池电量过低 无法启动正常清扫
+     *  Battery lower than start value; cannot   *
+     *  start clean; but can dock or pair net    *
+     *  Note to compare with Error#49            */
+            ERROR_BATTERY_LOW_TO_START   = 42;
+
+    /** 充电电压异常
+     *  trigger: QERR_CHARGE_VOLTAGE_ERR
+     *  charging voltage abnormal                */
+            ERROR_CHARGE_VOL_ABNORMAL    = 43;
+
+    /** 温度过高
+     *  operating temperature too high           */
+            ERROR_TEMPERATURE_HIGH       = 44;
+
+    /** 温度过低
+     *  operating temperature too low            */
+            ERROR_TEMPERATURE_LOW        = 45;
+
+    /** 尘盒未安装错误
+     *  trigger: QERR_DUST_UNINSTALL
+     *  Dust tank NOT installed; cannot start    *
+     *  clean                                    */
+            ERROR_DUST_UNINSTALLED       = 46;
+
+    /** 未安装水箱
+     *  trigger: QERR_TANK_UNINSTALL
+     *  water tank not installed;cannot start   *
+     *  clean                                   */
+            ERROR_TANK_UNINSTALLED       = 47;
+
+    /** 回充尝试后失败   @BASE 的对准
+     *  trigger: QERR_DOCK_FAILED
+     *  when pathplan guide the robot to origin *
+     *  or docker; robot would start basedock   *
+     *  this error reported by MCU or timeout   */
+            ERROR_BASE_DOCK_FAILED       = 48;
+
+    /** 未收到回充座信号 @PP 整个打扫过程中，没见过充电庄报错;
+     *  trigger: QERR_NO_DOCK_SIGNAL
+     *  no docker signal during entire cleaning  */
+            ERROR_NO_DOCK_SIGNAL         = 49;
+
+    /** 姿态错误
+     *  robot is incline                        */
+            ERROR_ATTITUDE               = 50;
+
+    /** 清扫无法完成
+     * (RARELY USED)                            */
+            ERROR_CANNOT_FINISH_CLEAN    = 51;
+
+    /** WIFI设置错误
+     *  wifi config timeout                     */
+            ERROR_WIFI_CONFIG_TIMEOUT    = 52;
+
+    /** WIFI 密码错误
+     *  wifi authorization failed; password is wrong */
+            ERROR_WIFI_AUTH_FAILED       = 53;
+
+    /** 升级失败
+     * OTA failed                               */
+            ERROR_OTA_FAILED             = 54;
+
+    /** 下载错误
+     * failed to download update.zip or md5     *
+     * check failed                             */
+            ERROR_OTA_DOWNLOAD_FAILED    = 55;
+
+    /** 空间不足
+     * no enough space to do update             */
+            ERROR_OTA_NO_SPACE_LEFT      = 56;
+
+    /** 电量不足
+     * no enough battery to do update           */
+            ERROR_OTA_BATTERY_LOW        = 57;
+
+    /**
+     * wifi ssid is not accessible              */
+            ERROR_WIFI_SSID_NOT_FOUND    = 58;
+
+    /**
+     * internet is not available                */
+            ERROR_WIFI_NO_INTERNET       = 59;
+
+    /**
+     * cloud service is not available           */
+            ERROR_WIFI_NO_SERVICE        = 60;
+
+    /** robot cannot start because of cliff is triggered */
+            ERROR_CLIFF_START_FAIL       = 61;
+
+    /** robot cannot start because of wheel drop is triggered */
+            ERROR_WHEEL_DROP_START_FAIL  = 62;
+
+    /** robot cannot start because of bumper is triggered */
+            ERROR_BUMPER_START_FAIL      = 63;
+
+    /** PP错误
+     * PP internal error(rarely used)           */
+            ERROR_PP_FATAL               = 64;
+
+    /** 脱困失败 @PP 清扫过程中报的;
+     * PathPlan try to escape failed            */
+            ERROR_PP_ESCAPE_FAILED	     = 65;
+
+    /** PP机器不能到达目标
+     * PathPlan cannot achieve destination      */
+            ERROR_PP_CANNOT_REACH_DEST   = 66;
+
+    /** 充电桩局部清扫
+     *  robot is on docker; cannot start spot   *
+     *  clean                                   */
+            ERROR_SPOT_ON_DOCKER         = 67;
+
+    /** 无法找到AED充电桩
+     *  cannot find AED DOCKER                  */
+            ERROR_AED_NOT_FOUND          = 68;
+
+    /** 无法完成AED
+     *  got timeout when doing AED process */
+            ERROR_AED_PROC_STUCK         = 69;
+
+    /** 机器卡住
+     *  (RARELY USED)robot is stuck             */
+            ERROR_ROBOT_STUCK            = 70;
+
+    /** 延边错误
+     *  Bondary error             */
+            ERROR_BOUNDARY               = 71;
+
+    /** VT错误
+     * VT internal error(rarely used)           */
+            ERROR_VT_FATAL               = 80;
+
+    /** 机器打滑太多导致停止
+     *  robot slip too much or stuck for more   *
+     *  than 20s; robot will stop clean when got*
+     *  this error                              */
+            ERROR_VT_SLIP                = 81;
+
+    /** 地图不一致
+     *  VisualMap and PathMap is not consistent */
+            ERROR_MAP_INCONSISTENT       = 82;
+
+    /** 地图状态忙，无法更新地图
+     *  VisualMap and PathMap is busy;          *
+     *  e.g. robot is cleaning or docking;      *
+     *  during these period; robot cannot save  *
+     *  or load                                 */
+            ERROR_MAP_BUSY               = 83;
+
+    /** 地图不一致
+     *  Map Save/load error                     */
+            ERROR_MAP_IO_ERROR           = 84;
+
+    /** 地图空间不足
+     *  no enough space left for map            */
+            ERROR_MAP_NO_SPACE_LEFT      = 85;
+
+    /** 地图重定位失败
+     * Map RELOCLIZATION failed; because vt map
+     * does not match real world                */
+            ERROR_MAP_RELOC_FAILED       = 86;
+
+    /** 震动器损坏
+     *  trigger: QERR_VIBRATOR_MOTOR_ERR
+     *  Vibrator motor broken; used for ping   *
+                                        */
+            ERROR_VIBRATOR_MOTOR_BROCKEN = 87;
+
+    /** SWDK温度异常 */
+            ERROR_TEMPERATURE_ERR        = 88;
+
+    /** When robot is reloc failed;
+     *  and no gozone/nogozone can be cleared.
+     */
+            ERROR_GNG_ZONE_CLEAN_FAILED  = 89;
+
+            ERROR_PICK_UP                = 90;
+    /** Special error; according to first WARN_LOW_LIGHT*/
+            ERROR_LOW_LIGHT              = 91;
+
+    /** Error do soft calibration in Clean mode*/
+    /*  清扫模式下扣零偏failed错误*/
+            ERROR_SOFTCALIFAILED         = 92;
+
+    /** Max Error Numbers                       */
+            MAX_ERROR_NUM                = 93;
+};
+
+/** UserCTRLCode */
+enum UserCtrlSignalT{
+    USR_CTR_NONE                 =  0;
+
+    /** 控制前进
+     *  make robot move forward                 */
+            USR_CTR_UP		             =  1;
+
+    /** 控制后退
+     *  make robot move backward                */
+            USR_CTR_DOWN                 =  2;
+
+    /** 控制原地左转
+     *  make robot turn left                    */
+            USR_CTR_LEFT                 =  3;
+
+    /** 控制原地右转
+     *  make robot turn right                   */
+            USR_CTR_RIGHT                =  4;
+
+    /** 控制电源按键
+     * (RARELY USED)reserved for power on button*/
+            USR_CTR_POWER_ON             =  5;
+
+    /** 控制电源按键
+     * (DEPRECATED)power off signal
+     * (for robot without mechanism switch)     */
+            USR_CTR_POWER_OFF            =  6;
+
+    /** 机器上的按键 (rarely used)*/
+            USR_CTR_POWER_ONOFF          =  7;
+
+    /** 暂停指令
+     *  pause signal; mainly for app; explicit  *
+     *  to pause robot                          */
+            USR_CTR_PAUSE                =  8;
+
+    /** 继续指令
+     *  continue/resume signal; mainly for app; *
+     *  explicit to start robot                 */
+            USR_CTR_RESUME               =  9;
+
+    /** pause/continue button;
+     *  mainly for button on robot; if robot is *
+     *  cleaning; then stop; V.V.               */
+            USR_CTR_PAUSE_RESUME         = 10;
+
+    /** start auto clean mode; no matter what   *
+     *  mode the robot previous in; the robot   *
+     *  would try to start clean                */
+            USR_CTR_AUTO                 = 11;
+
+    /** (RARELY USED) force robot enter waiting *
+     * mode.                                    */
+            USR_CTR_STOP                 = 12;
+
+    /** (RARELY USED) like USR_CTR_PAUSE_CONT   */
+            USR_CTR_AUTO_STOP            = 13;
+
+    /** 弓形清扫
+     * (DEPRECATED);same with USR_CTR_AUTO      */
+            USR_CTR_SNAKE                = 14;
+
+    /** 定点清扫
+     * Spot mode; cannot start on docker        */
+            USR_CTR_SPOT                 = 15;
+
+    /** 沿墙清扫
+     * (NOT FUNCTIONAL)Along wall mode;         */
+            USR_CTR_ALONG_WALL	         = 16;
+
+    /** 进充电站
+     * Dock mode                                */
+            USR_CTR_DOCK                 = 17;
+
+    /** WIFI重置
+     * config wifi signal                       */
+            USR_CTR_WIFI_RESET           = 18;
+
+    /** 静音模式
+     *  mute mode; disable audio                */
+            USR_CTR_MUTE                 = 19;
+
+    /** 强劲模式
+     * (RARELY USED) set fan speed to max       */
+            USR_CTR_GALE                 = 20;
+
+    /** 预约设定
+     * (RARELY USED) start set appointment      *
+     * (mainly for robot button)                */
+            USR_CTR_SET_SCHEDULE         = 21;
+
+    /** 升级指令
+     *  try start upgrade                       */
+            USR_CTR_OTA                  = 22;
+
+    /** 区域清扫
+     *  Zone clean                              */
+            USR_CTR_CLEAN_ZONE           = 23;
+
+    /** reboot                                  */
+            USR_CTR_REBOOT               = 24;
+
+    /** power off on docker; would trigger a    *
+     * audio; not real power off                */
+            USR_CTR_POWEROFF_IN_STATION  = 25;
+
+    /** 进入测试模式
+     *  enter test mode                         */
+            USR_CTR_EN_TEST              = 26;
+
+    /** 退出测试模式
+     *  exit  test mode                         */
+            USR_CTR_EX_TEST              = 27;
+
+    /** 休眠模式
+     *  (RARELY USED)force enter sleep mode     */
+            USR_CTR_SLEEP                = 28;
+
+    /** 跑机模式
+     *  (RARELY USED)enter bdp mode             */
+            USR_CTR_FACTORY_TEST         = 29;
+
+    /** 下位机回充，踢开充电
+     *  (RARELY USED)force enter base dock;only *
+     *  used for test                           */
+            USR_CTR_BASE_DOCK            = 30;
+
+    /** 倒垃圾
+     *  force start AutoEmptyDock Mode normally *
+     *  this mode will automatic start.         */
+            USR_CTR_AED                  = 31;
+
+    /** aging test
+     *
+     *                                          */
+            USR_CTR_AGING_TEST           = 32;
+
+    /** RESET
+     *
+     *                                          */
+            USR_CTR_RESET                = 33;
+
+    /** CALI IMU
+     *
+     *                                          */
+            USR_CTR_CALI_IMU             = 34;
+
+    /** warm boot
+     *
+     *                                          */
+            USR_CTR_WARM_BOOT            = 35;
+
+    /** recharge resume control
+     *
+     *                                          */
+            USR_CTR_RECHARGE_RESUME      = 36;
+
+    /** evaucation resume control
+     *
+     *                                          */
+            USER_CTR_EVAUCATION_RESUME   = 37;
+
+
+    /** User control number                     */
+            MAX_USR_CTR_NUM              = 38;
+};
+
+/** internal and external signal                */
+enum StateSignalT{
+    SIG_NONE                     =  0;
+
+    /** 外部信号正在充电
+     * Robot is charging;sustained signal       */
+            SIG_EXT_CHARGING             =  1;
+
+    /** 外部信号充电完成
+     * Robot is charged; sustained signal       */
+            SIG_EXT_CHARGED              =  2;
+
+    /** 外部信号充电器插入
+     * Charge port have proper voltage;         *
+     * sustained signal                         */
+            SIG_EXT_CHARGE_RAW           =  3;
+
+    /** 外部信号充电器插入
+     *  charge with wire
+     **/
+            SIG_EXT_WIRE_CHARGE          =  4;
+
+    /** 外部信号插入尘盒
+     * Dust tank insertation detected           */
+            SIG_EXT_INSERT_DUST          =  5;
+
+    /** 外部信号插入水箱
+     * Water tank insertation detected          */
+            SIG_EXT_INSERT_TANK          =  6;
+
+    /** 外部信号预约开
+     *  Appointment time hitted; robot should   *
+     *  start                    */
+            SIG_EXT_SCHEDULE_ON          =  7;
+
+    /** 外部信号预约关
+     * (RARELY USED)Appointment time arrived;   *
+     * robot should stop                        */
+            SIG_EXT_SCHEDULE_OFF         =  8;
+
+    /** WIFI已连接
+     * Wifi have connected                      */
+            SIG_EXT_WIFI_CONNECTED       =  9;
+
+    /** 外部信号配置WIFI Wifi                     */
+            SIG_EXT_WIFI_CONFIGED        = 10;
+
+    /** 外部信号配置成功
+     * (RARELY USED) Wifi config success        */
+            SIG_EXT_WIFI_CONFIG_FINISH   = 11;
+
+    /** 外部信号配置失败
+     * (rarely used) wifi config failed         */
+            SIG_EXT_WIFI_CONFIG_FAILED   = 12;
+
+    /** 外部信号WIFI唤醒
+     * wake up signal caused by wifi            */
+            SIG_EXT_WIFI_WAKEUP          = 13;
+
+    /** 外部信号MCU唤醒
+     * wake up signal caused by MCU             */
+            SIG_EXT_MCU_WAKEUP           = 14;
+
+    /** 外部信号RTC唤醒
+     * wake up signal caused by RTC             *
+     * (include appointment/heart beat)         */
+            SIG_EXT_RTC_WAKEUP           = 15;
+
+    /** 内部信号清扫完成
+     * sig clean finished                       */
+            SIG_INTER_CLEAN_FINISHED     = 16;
+
+    /** 内部信号回充完成
+     * sig dock finished                        */
+            SIG_INTER_DOCK_FINISHED      = 17;
+
+    /** 内部信号定点清扫完成
+     * sig spot finished                        */
+            SIG_INTER_SPOT_FINISHED      = 18;
+
+    /** 内部信号下载完成
+     * sig download finished                    */
+            SIG_INTER_DOWNLOAD_FINISHED  = 19;
+
+
+    /** 升级成功
+     * sig upload finished                      */
+            SIG_INTER_IAP_FINISHED       = 22;
+
+    /** 内部信号充电完成
+     * sig charge finished                      */
+            SIG_INTER_CHARGE_FINISHED    = 23;
+
+    /** 内部信号唤醒
+     * sig internal wake up                     */
+            SIG_INTER_WAKE_UP            = 24;
+
+    /** 内部信号进入睡眠
+     * (RARELY USED)sig enter sleep             */
+            SIG_INTER_EN_SLEEP           = 25;
+
+    /** 内部信号进入升级
+     * (RARELY USED)sig enter update            */
+            SIG_INTER_EN_OTA             = 26;
+
+    /** 内部信号进入打扫
+     * (RARELY USED)sig enter clean             */
+            SIG_INTER_EN_CLEAN           = 27;
+
+    /** 内部信号进入定点
+     * (RARELY USED)sig inter spot              */
+            SIG_INTER_EN_SPOT            = 28;
+
+    /** 内部信号进入回充
+     * (RARELY USED)sig enter dock              */
+            SIG_INTER_EN_DOCKING         = 29;
+
+    /** sig insert roll brush                   */
+            SIG_EXT_INSERT_ROLL_BRUSH    = 30;
+
+    /** 预约设置成功信号
+     * sig insert mop                           */
+            SIG_EXT_INSERT_MOP           = 31;
+
+    /** 预约设置成功信号
+     * send signal when appointment set success */
+            SIG_EXT_SCHEDULE_SETTED      = 32;
+
+    /** 请求所有地图
+     * Signal send to robot to request robot    *
+     * upload all maps;                         */
+            SIG_EXT_REQ_ALL_MAP          = 33;
+
+    /** 请求语音包名称
+     * Signal send to robot to request current  *
+     * robot sound package language             */
+            SIG_EXT_REQ_SOUND_PACKAGE    = 34;
+
+    /** VT reloc OK(normal one)
+     *
+     */
+            SIG_INT_VT_RELOC_OK          = 35;
+
+    /** VT reloc consist with old map;
+     *
+     */
+            SIG_INT_VT_RELOC_WITH_OLD_MAP= 36;
+
+
+    /** OtaStart signal; after USR_CTR_UPDATING Signal
+     *  && robot go into SYS_ST_UPDATING
+     *  then robot is waiting for SIG_EXT_OTA_PROCESS_START
+     *  to unzip and reboot
+     */
+            SIG_EXT_OTA_PROCESS_START    = 37;
+
+    /** OtaStart signal; after USR_CTR_UPDATING Signal
+     *  && robot go into SYS_ST_UPDATING
+     *  then if SIG_EXT_OTA_PROCESS_ABORT received;
+     *  robot will reboot WITHOUT ota
+     */
+            SIG_EXT_OTA_PROCESS_ABORT    = 38;
+
+    /**
+     *  When Robot is waked up by RTC and try to send heart beat signal
+     *  Robot would send out SIG_INT_SLEEP_AWAKE signal; to inform every one
+     */
+            SIG_INT_SLEEP_AWAKE          = 39;
+
+    /**
+     *   when IOT server received SIG_INT_SLEEP_AWAKE; server should
+     *   send SIG_EXT_HEART_BEAT_OK  to make robot sleep again;
+     *   otherwise; robot would wait until time_out(15s by default)
+     */
+            SIG_EXT_HEART_BEAT_OK        = 40;
+
+    /**
+     */
+            SIG_INT_SHUT_DOWN            = 41;
+
+    /**
+     * REBOOT L01; used for ota
+     */
+            SIG_INT_REBOOT               = 42;
+
+    /**
+     * restart roboserver app with silent
+     */
+            SIG_INT_RESTART              = 43;
+
+    /**
+     * tell ota module to start download
+     */
+            SIG_INT_OTA_DOWNLOAD_START   = 44;
+
+    /**
+     * when ota success signal is checked
+     */
+            SIG_INT_OTA_SUCCESS          = 45;
+
+
+    /**
+     */
+            SIG_INT_PM_REQ_SLEEP       = 46;
+
+    /**
+     */
+            SIG_INT_PM_PERMIT_SLEEP    = 47;
+
+    /**
+     */
+            SIG_INT_BDP_REQ_SSID       = 48;
+
+    /**
+     * user delete all persist map
+     */
+            SIG_EXT_MAP_CLEAR_ALL      = 49;
+
+
+    /**
+     * request send from robot to apps.
+     * and robot will waiting rr for next 4 hours.
+     */
+            SIG_INT_REQ_2R_PERMIT      = 50;
+
+    /**
+     * permittion send from app to robot.
+     * if there is no permittion during 4hours.
+     * the 2R will be disabled.
+     */
+            SIG_EXT_ENABLE_2R_ONCE     = 51;
+
+    /**
+     * undo the "enable current rr"
+     * 2R process is not interrupt
+     * if you want interrupt process; use USR_CTR_STOP
+     */
+            SIG_EXT_SET_2R_PENDING     = 52;
+
+    /**
+     * if RS is not in 2R status
+     * RS would reply this
+     */
+            SIG_INT_2R_OP_DENIED       = 53;
+
+    /**
+     * Error signal; the Floor control is denied
+     * 1. the robot is not in waiting mode
+     * 2. the floor control params is wrong.
+     */
+            SIG_INT_FLOOR_CTR_DENIED   = 54;
+
+    /**
+     * the Floor control is accepted
+     */
+            SIG_INT_FLOOR_CTR_ACCEPTED = 55;
+
+    MAX_SIG_NUM                = 56;
+};
+
+/** OTA Status;
+ *
+ */
+enum OTA_STATUS_T{
+    OTA_NONE                     = 0;
+    /** robot is checking battery voltage;      *
+     * checking charging signal etc.            */
+            OTA_CHECKING                 = 1;
+    /** 正在下载;
+     *  Downloading update.zip                  */
+            OTA_DOWNLOADING              = 2;
+    /** Download package finish(after md5check) */
+            OTA_DOWNLOAD_FINISH          = 3;
+    /** (RARELY USE) updating firmware          */
+            OTA_UPDATING_FW              = 4;
+    /** (RARELY USE) updating software          */
+            OTA_UPDATING_RVC             = 5;
+    /** OTA finished. already reboot            */
+            OTA_FINISHED                 = 6;
+    /** OTA failed                              */
+            OTA_ERROR                    = 7;
+};
+
+enum PathPlanningStartModeT {           /**< Path Planning模块启动模式*/
+    ON_STATION_MODE         = 0;        /**< 是否从充电座上启动*/
+    HISTORY_MAP_MODE        = 1;        /**< 是否要使用历史地图模式*/
+    CONTINUOUS_CLEAN_MODE   = 2;        /**< 是否属于续扫或分区清扫*/
+    MAX_START_MODE_NUM      = 3;
+};
+
+/**< Status of PathPlanning motions*/
+enum PathPlanningMotionT{
+
+    PP_UNINIT_STATE              = 0;
+    /** Escape  mapEditState with follow motion             */
+            PP_ESCAPE_FOLLOW             = 1;
+    /** Escape  mapEditState with straight motion           */
+            PP_ESCAPE_STRAIGHT           = 2;
+    /** Follow  mapEditState with straight motion           */
+            PP_ALONG_BOUNDARY            = 3;
+    /** Follow  mapEditState with straight motion           */
+            PP_EXPLORE_BOUNDARY          = 4;
+    /** Follow  mapEditState with follow motion             */
+            PP_FOLLOW_BOUNDARY           = 5;
+    /** Follow  mapEditState with navigation motion         */
+            PP_NAVIGATE_BOUNDARY         = 6;
+    /** Z shape mapEditState with straight motion           */
+            PP_ALONG_FRONTIER            = 7;
+    /** Z shape mapEditState with straight motion           */
+            PP_CROSS_FRONTIER            = 8;
+    /** Z shape mapEditState with navigation motion         */
+            PP_FOLLOW_FRONTIER           = 9;
+    /** Z shape mapEditState with navigation motion         */
+            PP_NAVIGATE_FRONTIER         = 10;
+    /** Z shape mapEditState with rotation motion           */
+            PP_ROTATE_FRONTIER           = 11;
+    /** Prepare mapEditState ready to leave station         */
+            PP_LEAVE_STATION             = 12;
+    /** Random  mapEditState with random motion             */
+            PP_RANDOM_WALK               = 13;
+    /** Region clean mapEditState with navigation motion    */
+            PP_NAVIGATE_REGION           = 14;
+    /** Navigation to origin                         */
+            PP_NAVIGATE_ORIGIN           = 15;
+    /** Spot clean mapEditState with circle motion          */
+            PP_SPIRAL_CIRCLE             = 16;
+    /** Spot clean mapEditState with straight motion        */
+            PP_SPIRAL_STRAIGHT           = 17;
+    /** Escape  mapEditState with along zone boundary motion*/
+            PP_ESCAPE_ALONG              = 18;
+    MAX_PP_MOTION_NUM            = 19;
+};
+
+/**< Wake up type; */
+enum WakeUpTypeT
+{
+    /** 无唤醒       Default Value; */
+            WUT_NONE                     = 0;
+
+    /** 规律唤醒
+     * Regularly(Heart beat) wake up. Intent to     *
+     * keep IOT online. Normally every 4 mins.      *
+     * Note!: during regularly wake up; the robot   *
+     * is acting as sleep mode;                     */
+            WUT_HEART_BEAT               = 1;
+
+    /** 定时任务唤醒
+     *  Time Strategy wake up; caused by appointment*
+     *  time arrive                                 */
+            WUT_SCHEDULE                 = 2;
+
+    /** wifi唤醒
+     *  Wifi wake up; caused by app connected       */
+            WUT_WIFI                     = 3;
+
+    /** 按键唤醒
+     *  Button wake up; caused when MCU wake        */
+            WUT_MCU                      = 4;
+
+    /** 其他
+     *  Other wake up;  caused by unknown           */
+            WUT_OTHER                    = 5;
+};
+
+
+enum AudioIDT{
+
+    /** No Audio
+     *  Func: No Audio
+     *  CN: "站位"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_NONE                   =  0;
+
+    /** Power On Music
+     *  Func: played when every time main program
+     *  is started.
+     *  CN: "开机音乐"
+     *  EN: "Hi; I am XXX; how are you?"
+     **/
+            AUDIO_POWER_ON               =  1;
+
+    /** Power Off Music
+     *  Func: when power off cmd recieved; mainly
+     *  for robot without mechanic button.
+     *  CN: "关机"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_POWER_OFF              =  2;
+
+
+    /** Start Clean
+     *  Func: start clean when everything ok
+     *  CN: "清洁工作开始"
+     *  EN: "My friend; I will start working now."
+     **/
+            AUDIO_CLEAN_START            = 16;
+
+    /** Pause Clean
+     *  Func: pause clean when uc_pause/pause_resume recieved
+     *  CN: "清洁工作暂停 "
+     *  EN: "Do you want to stop cleaning? Let me have a rest.????"
+     **/
+            AUDIO_CLEAN_PAUSE            = 17;
+
+    /** Resume Clean
+     *  Func: when robot in pause/error mode from clean; and recieved UC_RESUME/CLEAN
+     *  CN: "继续清洁工作 ??清洁工作继续??"
+     *  EN: "OK. I will continue now."
+     **/
+            AUDIO_CLEAN_RESUME           = 18;
+
+    /** Clean Interruptted / STOPPED
+     *  Func: RESERVED; clean stopped by accident.
+     *  CN: "RESERVED"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_CLEAN_STOPPED          = 19;
+
+    /** Clean Finished
+     *  Func: when  all  known area is cleaned; and no unkown area
+     *  CN: "清洁完成，开始回充"
+     *  EN: "Finished.  Let me get more energy."
+     **/
+            AUDIO_CLEAN_FINISH           = 20;
+
+    /**
+     *  Func:
+     *  CN: "清洁完成，开始"
+     *  EN: ""
+     **/
+            AUDIO_CLEAN_FAILED           = 21;
+
+
+
+
+
+
+    /****************SPOT****************/
+    /** Start Clean
+     *  Func: start spot clean when everything ok
+     *  CN: "开始局部清洁工作"
+     *  EN: "OK，I will clean here."
+     **/
+            AUDIO_SPOT_START             = 32;
+
+    /** Pause Spot Clean
+     *  Func: RESERVED
+     *  CN: "RESERVED"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_SPOT_PAUSE             = 33;
+
+    /** Resume Spot Clean
+     *  Func: RESERVED
+     *  CN: "RESERVED"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_SPOT_RESUME            = 34;
+
+    /** Spot clean Interruptted /Stopped
+     *  Func: Spot clean stopped by accident.
+     *  CN: "退出局部清扫????清扫还是清洁"
+     *  EN: "OK，I will stop."
+     **/
+            AUDIO_SPOT_STOPPED           = 35;
+
+    /**
+     *  Func:
+     *  CN: "局部清扫完成????"
+     *  EN: "OK，I will stop.(same with stopped)"
+     **/
+            AUDIO_SPOT_FINISH            = 36;
+
+    /** Spot Clean Failed
+     *  Func: RESERVED
+     *  CN: "RESERVED"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_SPOT_FAILED            = 37;
+
+
+
+
+    /****************DOCK****************/
+
+    /** Start Dock
+     *  Func: start dock; but when clean finished; we use CLEAN_FINISH
+     *  CN: "进入回充模式？？开始回充"
+     *  EN: "starting to recharge"
+     **/
+            AUDIO_DOCK_START             = 48;
+
+    /** Pause Clean
+     *  Func: pause dock when uc_pause/pause_resume recieved
+     *  CN: "回充暂停"
+     *  EN: "Recharging stopped????这个可以继续的。"
+     **/
+            AUDIO_DOCK_PAUSE             = 49;
+
+    /** Resume Clean 需要增加++++
+     *  Func: when robot in pause/error mode from clean; and recieved UC_RESUME/CLEAN
+     *  CN: "++ 继续回充"
+     *  EN: "++ resume recharge"
+     **/
+            AUDIO_DOCK_RESUME            = 50;
+
+    /** Clean Interruptted
+     *  Func: Spot clean stopped by accident.
+     *  File:
+     *  CN: "停止局部清洁工作??停止局部清洁工作??"
+     *  EN: "OK，I will clean here."
+     **/
+            AUDIO_DOCK_STOPPED           = 51;
+
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_DOCK_FINISH            = 52;
+
+    /**
+     *  Func: RESERVED covered by start charging
+     *  CN: "RESERVED"
+     *  EN: "RESERVED"
+     **/
+            AUDIO_DOCK_FAILED            = 53;
+
+    /**
+     *  FUNC:
+     *  TRIG: ERROR_NO_DOCK_SIGNAL
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_NO_DOCK_SIGNAL         = 54;
+
+    /** 无法回到充电桩*/
+    /**
+     *  trigger: ERROR_BASE_DOCK_FAILED
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BASE_DOCK_FAILED       = 55;
+
+
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_DOCK_VIA_LOW_BATTERY   = 56;
+
+    /**         */
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_AED_NOT_FOUND          = 57;
+
+    /**         */
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_AED_PROC_STUCK         = 58;
+
+    /**倒垃圾**/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_AED_BEGIN              = 59;
+
+
+    /***************UPGRADE*****************/
+    /** 开始升级>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_OTA_START              = 64;
+
+    /** 升级成功>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_OTA_FINISH             = 65;
+
+    /** 升级失败 */
+    /**
+     *  trigger: ERROR_OTA_FAILED
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_OTA_FAILED             = 66;
+
+
+
+    /**************EVENTS****************/
+
+    /** 配置WIFI*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_CONFIG_START      = 72;
+
+    /** 配置WIFI成功*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_CONFIG_FINISH     = 73;
+
+    /** 配置WIFI超时*/
+    /**
+     *  trigger: ERROR_WIFI_CONFIG_TIMEOUT
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_CONFIG_TIMEOUT    = 74;
+
+    /** 配置WIFI超时*/
+    /**
+     *  trigger: ERROR_WIFI_AUTH_FAILED
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_AUTH_FAILED       = 75;
+
+    /**
+     *  Trigger: ERROR_WIFI_SSID_NOT_FOUND
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_SSID_NOT_FOUND           = 76;
+
+    /**
+     *  Trigger: ERROR_WIFI_NO_INTERNET
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_NO_INTERNET             = 77;
+
+    /**
+     *  Trigger: ERROR_WIFI_NO_SERVICE
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIFI_NO_SERVICE               = 78;
+
+
+
+
+/************* 尘盒水箱 ***************/
+    /** 尘盒装入*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_DUST_INSTALLED         = 80;
+
+    /** 尘盒未安装*/
+    /**
+     *  trigger: ERROR_DUST_UNINSTALLED
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_DUST_UNINSTALL         = 81;
+
+    /** 尘盒满*/
+    /**
+     *  trigger: WARN_DUST_FULL
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_DUST_FULL              = 82;
+
+    /** 水箱装入*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TANK_INSTALLED         = 83;
+
+    /** 水箱被取出*/
+    /**
+     *  trigger: ERROR_TANK_UNINSTALLED
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TANK_UNINSTALL         = 84;
+
+    /** 水箱水量低*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TANK_LOW               = 85;
+
+    /** 水箱缺水*/
+    /**
+     *  trigger: WARN_TANK_EMPTY
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TANK_EMPTY             = 86;
+
+    /** 水箱或抹布已安装>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_RAG_INSTALLED          = 87;
+
+    /** 水箱或抹布已安装>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_RAG_UNINSTALLED        = 88;
+
+
+    /** 温度过低*/
+    /**
+     *  trigger: ERROR_TEMPERATURE_LOW
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TEMPERATURE_LOW        = 89;
+
+    /** 温度过低*/
+    /**
+     *  trigger: ERROR_TEMPERATURE_HIGH
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TEMPERATURE_HIGH       = 90;
+
+    /** 温度异常*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_TEMPERATURE_ERR        = 91;
+
+    /** 开始充电>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CHARGE_START           = 96;
+
+    /** 充电完成>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CHARGE_FINISH          = 97;
+
+    /** 电池电量低*/
+    /**
+     *  trigger: ERROR_BATTERY_CRITICAL_LOW
+     *           WARN_BATTERY_LOW
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BATTERY_LOW            = 98;
+
+    /** 电池状态异常*/
+    /**
+     *  trigger: ERROR_BATTERY_ABNORMAL
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BATTERY_ABNORMAL       = 99;
+
+    /** 充电故障*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CHARGE_FAULT           = 100;
+
+    /** 充电电压异常  */
+    /**
+     *  trigger: ERROR_CHARGE_VOL_ABNORMAL
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CHARGE_VOLTAGE_ERR     = 101;
+
+
+    /** 我在这>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_IM_HERE                = 104;
+
+
+    /** 定时清扫时间，设置成功>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_SCHEDULE_SET_FINISH    = 105;
+
+    /** 清扫时间到，开始清扫>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_SCHEDULE_START_CLEAN   = 106;
+
+
+    /** 轮子抬起
+     *  trigger:
+     *
+     *
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WHEEL_DROP_START_FAIL  = 120;
+
+    /** 轮子抬起
+     *  trigger:
+     *
+     *
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CLIFF_START_FAIL       = 121;
+
+    /**
+     *  trigger: ERROR_ENDATA
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_ENDATA_ERROR          = 122;
+
+    /** 轮子抬起
+     *  trigger:
+     *
+     *
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BUMPER_START_FAIL      = 123;
+
+    /**
+     *  trigger: ERROR_WHEEL_DROP_L
+     *           ERROR_WHEEL_DROP_R
+     *           ERROR_WHEEL_DROP_BOTH
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WHEEL_DROP             = 128;
+
+    /** 主轮堵转*/
+    /**
+     *  trigger: ERROR_WHEEL_STUCK_L
+     *           ERROR_WHEEL_STUCK_R
+     *           ERROR_WHEEL_STUCK_BOTH
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WHEEL_STUCK            = 129;
+
+    /** 主轮异常>*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WHEEL_BROCKEN          = 130;
+
+    /** 边刷堵转*/
+    /**
+     *  trigger: ERROR_SFRONT_WHEEL_STUCK_L
+     *           ERROR_SFRONT_WHEEL_STUCK_R
+     *           ERROR_SFRONT_WHEEL_STUCK_BOTH
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_SFRONT_WHEEL_STUCK       = 131;
+
+    /** 边刷堵转*/
+    /**
+     *  trigger:  AUDIO_SFRONT_WHEEL_BROCKEN
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_SFRONT_WHEEL_BROCKEN     = 132;
+
+    /** 主刷堵转*/
+    /**
+     *  trigger: ERROR_RFRONT_WHEEL_STUCK
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_RFRONT_WHEEL_STUCK       = 133;
+
+    /** 主刷堵转*/
+    /*
+     *  trigger: ERROR_RFRONT_WHEEL_BROCKEN
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_RFRONT_WHEEL_BROCKEN     = 134;
+
+
+
+    /** 风机卡住*/
+    /**
+     *  trigger: ERROR_FAN_STUCK
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_FAN_STUCK              = 135;
+
+    /** 风机异常*/
+    /**
+     *  trigger: ERROR_FAN_BROCKEN
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_FAN_BROCKEN            = 136;
+
+
+
+    /** 喷水电机堵转*/
+    /**
+     *  trigger: ERROR_PUMP_STUCK
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_PUMP_STUCK             = 137;
+
+    /** 喷水电机异常*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_PUMP_BROCKEN           = 138;
+
+    /** 擦地电机堵转*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIPE_MOTOR_STUCK       = 139;
+
+    /** 擦地电机堵转*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WIPE_MOTOR_BROCKEN     = 140;
+
+    /** 离传感器错误*/
+    /**
+     *  trigger: ERROR_DATA_TOF
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_RANGE_DATA_ERR         = 141;
+
+    /** 沿墙传感器错误*/
+    /**
+     *  trigger: ERROR_DATA_IR
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_WALL_ERR               = 142;
+
+    /** 悬崖传感器错误*/
+    /**
+     *  trigger: ERROR_DATA_CLIFF
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CLIFF_ERR              = 143;
+
+    /** 碰撞传感器错误*/
+    /**
+     *  trigger: ERROR_DATA_BUMPER
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BUMP_ERR               = 144;
+
+    /** 按钮被按下15s */
+    /**
+     *  trigger: ERROR_BUTTON_BROCKEN
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BUTTON_ERR             = 145;
+
+    /** 摄像头成像错误*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CAM_DATA_ERR           = 146;
+
+    /** 脱困失败*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_ESCAPE_FAILED          = 147;
+
+
+    /** 启动姿态错误*/
+    /**
+     *  trigger: ERROR_ATTITUDE
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_ATTITUDE_ERR           = 148;
+
+    /** 初始化错误*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_INIT_ERR               = 149;
+
+
+    /** 请擦摄像头*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_CLEAN_LENS             = 150;
+
+    /** 内部错误;万能错误，万一无法找到问题，报这个*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_INTERNAL_ERROR         = 151;
+
+    /** 哔*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BI                     = 152;
+
+    /** 哔哔*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BIBI                   = 153;
+
+    /** 哔哔哔*/
+    /**
+     *  Func:
+     *  CN: ""
+     *  EN: ""
+     **/
+            AUDIO_BIBIBI                 = 154;
+
+
+
+    /** 充电过程中，无法回充> */
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_DOCK_WHEN_CHARGING     = 155;
+
+    /** 充电过程中，无法关机> */
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_POWER_OFF_WHEN_CHARGING= 156;
+
+    /** 充电桩启动局部清扫> */
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_SPOT_ON_DOCK           = 157;
+
+    /** 机器卡住 */
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_ROBOT_STUCK            = 158;
+
+
+
+    /** 摄像头太暗WARNING */
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_LOW_LIGHT              = 159;
+
+    /** 机器卡住 >*/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_IMU_CALI               = 160;
+
+
+    /**地图不一致**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_MAP_INCONSISTENT       = 161;
+
+    /**地图状态不对**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_MAP_BUSY               = 162;
+
+    /**地图状态不对**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     **/
+            AUDIO_MAP_IO_ERROR           = 163;
+
+
+    /**地图空间不足**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_MAP_NO_SPACE_LEFT      = 164;
+
+    /**地图空间不足**/
+    /**
+     *  Trigger: ERROR_BOUNDARY
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_BOUNDARY_ERR           = 165;
+
+    /**跑机错误**/
+    /**
+     *  Trigger: RTT ERROR
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_RTT_ERR                = 166;
+
+    /**重定位失败错误语音**/
+    /**
+     *  Trigger: RELOC ERROR
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_RELOC_FAILED            = 167;
+
+            AUDIO_OPTIC_INIT_ERROR        = 169;
+
+    /**打开recharge_resume**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_ENABLE_RECHARGE_RESUME           = 170;
+
+    /**取消recharge_resume**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_DISABLE_RECHARGE_RESUME            = 171;
+
+
+    /**打开evaucation_resume**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_ENABLE_EVAUCATION_RESUME           = 172;
+
+    /**取消evaucation_resume**/
+    /**
+     *  Func:
+     *  CN:
+     *  EN:
+     */
+            AUDIO_DISABLE_EVAUCATION_RESUME            = 173;
+    /** MAX  */
+            AUDIO_MAX_NUM                 = 174;
+};
+
+
+
+enum WifiStatusT
+{
+    WIFI_NONE                    = 0;   /**< stay unchanged; use last status     */
+    WIFI_CONFIGURING             = 1;   /**< ap is configuring                   */
+    WIFI_CONNECTING              = 2;   /**< try connecting with given ssid&pwd. */
+    WIFI_CONNECTED               = 3;   /**< robot is already connected to cloud */
+    WIFI_CONNECTED_INTERNET      = 4;   /**< *DEPRICATED* connect to internet    */
+    WIFI_DRIVER_ERR              = 5;   /**< *DEPRICATED* driver error           */
+    WIFI_UNKNOW_ERR              = 6;   /**< Any Error while configuring         */
+    WIFI_UNCONNECTED             = 7;   /**< robot is offline                    */
+};
+
+enum ScheduleOpT                        /**<*<  Appointment operation  temporarily only
+                                          *    upload and download is functional
+                                          *    and there is no plan to add other operation  */
+{
+    SCHEDULE_OP_NONE             = 0;   /**<                                               */
+    SCHEDULE_OP_UPLOAD           = 1;   /**< upload all strategies from robot to app       */
+    SCHEDULE_OP_DOWNLOAD         = 2;   /**< download all strategies from app to robot     */
+    SCHEDULE_OP_SET_RTC          = 3;   /**< set rtc time                                  */
+};
+
+enum MapTypeT
+{
+    /**should never happened          */
+            MT_NONE                      = 0;
+
+    /** used for real time uploading   */
+            MT_RT_UPLOAD                 = 1;
+
+    /** used for map history upload     */
+            MT_REPORT                    = 2;
+
+    /** used for app set (no)go zone   */
+            MT_SET_ZONE                  = 3;
+
+    /** used for app set (no)go zone   */
+            MT_PERSIST                   = 4;
+
+};
+
+enum MapDataTypeT
+{
+    /**should never happened          */
+            MDT_NONE                   = 0;
+
+    /** used for most common map      */
+            MDT_CLEAN_MAP              = 1;
+
+    /** used for heat map             */
+            MDT_HEAT_MAP               = 2;
+
+    /** used for lidar drawed map     */
+            MDT_LIDAR_MAP              = 3;
+
+    /** used for lidar map with PP info*/
+            MDT_LIDAR_MIXED            = 4;
+};
+
+enum WifiCtrT                           /*wifi working mode*/
+{
+    WIFI_CTR_NONE                = 0;   /*占位                               */
+    WIFI_CTR_RESET               = 1;   /*reset ( change to AP mode) 重置    */
+    WIFI_CTR_CONFIG              = 2;   /*start config ( getting ssid and pwd)  WIFI开始配网*/
+    WIFI_CTR_CONNECT             = 3;   /*start connect with given ssid and pwd WIFI链接*/
+};
+
+enum VTControlT                         /*VisualTracker internal module; app can ignore 视觉定位模块指令;内部使用.*/
+{
+    VT_CONTROL_NONE              = 0;
+    VT_CONTROL_INIT              = 1;   /** 初始化，清数据                 */
+    VT_CONTROL_PAUSE             = 2;   /** 暂停                         */
+    VT_CONTROL_RESUME            = 3;   /** 恢复                         */
+    VT_CONTROL_STOP              = 4;   /** 停止                         */
+    VT_CONTROL_RUN               = 5;   /** 运行                         */
+    VT_CONTROL_RELOCATION        = 6;   /** 重定位                        */
+    VT_CONTROL_STOP_INIT_POSE    = 7;   /** 停止初始化位姿                 */
+    VT_CONTROL_RUN_PARAM         = 8;   /** 带参数运行                    */
+    VT_CONTROL_STOP_PARAM        = 9;   /** 带参数停止                    */
+    VT_CONTROL_DO_TEMPCOEFFS     = 10;  /** 开始做温度标定                 */
+    VT_CONTROL_EX_TEMPCOEFFS     = 11;  /** 退出温度标定                 */
+    VT_CONTROL_STOP_TEMPCOEFFS   = 12;  /** 停止温度标定                 */
+};
+
+
+enum PriorityT
+{
+    PRIORITY_NORMAL              = 0;
+    PRIORITY_CRITICAL            = 1;
+};
+
+
+
+
+
+
+
+
+
+
+/**<
+ *FOR Robot:: F: Front(not Mid) B: BACK M: MiddleFront T:TOP(Front) L: Left R: Right N: Near
+ *FOR Base :: M: Middle L: Left R: Right N: Near
+ * 进站时所需的传感器信息;该协议最多支持8路信号
+*/
+enum DockingSignalT{
+    DOCK_ML_N                    =  0;   /** 中左接收到顶灯（靠近）信号*/
+    DOCK_ML_L                    =  1;   /** 中左接收到左信号*/
+    DOCK_ML_ML                   =  2;   /** 中左接收到中左信号*/
+    DOCK_ML_M                    =  3;   /** 中左接收到中信号*/
+    DOCK_ML_MR                   =  4;   /** 中左接收到中右灯信号*/
+    DOCK_ML_R                    =  5;   /** 中左接收到右信号*/
+    DOCK_MR_N                    =  6;   /** 中右接收到顶灯（靠近）信号*/
+    DOCK_MR_L                    =  7;   /** 中右接收到左信号*/
+    DOCK_MR_ML                   =  8;   /** 中右接收到中左信号*/
+    DOCK_MR_M                    =  9;   /** 中右接收到中信号*/
+    DOCK_MR_MR                   = 10;   /** 中右接收到中右灯信号*/
+    DOCK_MR_R                    = 11;   /** 中右接收到右信号*/
+
+    DOCK_FLMT_N                  = 12;   /** 左前（顶灯）接收到顶灯（靠近）信号*/
+    DOCK_FLMT_L                  = 13;   /** 左前（顶灯）接收到左信号*/
+    DOCK_FLMT_ML                 = 14;   /** 左前（顶灯）接收到中左信号*/
+    DOCK_FLMT_M                  = 15;   /** 左前（顶灯）接收到中信号*/
+    DOCK_FLMT_MR                 = 16;   /** 左前（顶灯）接收到中右信号*/
+    DOCK_FLMT_R                  = 17;   /** 左前（顶灯）接收到右信号*/
+
+    DOCK_L_N                     = 18;   /** 左接收到顶灯（靠近）信号*/
+    DOCK_L_L                     = 19;   /** 左接收到左信号*/
+    DOCK_L_ML                    = 20;   /** 左接收到中左信号*/
+    DOCK_L_M                     = 21;   /** 左接收到中信号*/
+    DOCK_L_MR                    = 22;   /** 左接收到中右信号*/
+    DOCK_L_R                     = 23;   /** 左接收到中右信号*/
+
+    DOCK_BL_N                    = 24;   /** 左后接收到顶灯（靠近）信号*/
+    DOCK_BL_L                    = 25;   /** 左后接收到左信号*/
+    DOCK_BL_ML                   = 26;   /** 左后接收到中左信号*/
+    DOCK_BL_M                    = 27;   /** 左后接收到中信号*/
+    DOCK_BL_MR                   = 28;   /** 左后接收到中右信号*/
+    DOCK_BL_R                    = 29;   /** 左后接收到右信号*/
+
+    DOCK_FR_N                    = 30;   /** 右前接收到顶灯（靠近）信号*/
+    DOCK_FR_L                    = 31;   /** 右前接收到左信号*/
+    DOCK_FR_ML                   = 32;   /** 右前接收到中左信号*/
+    DOCK_FR_M                    = 33;   /** 右前接收到中信号*/
+    DOCK_FR_MR                   = 34;   /** 右前接收到中右信号*/
+    DOCK_FR_R                    = 35;   /** 右前接收到右信号*/
+
+    DOCK_R_N                     = 36;   /** 右接收到顶灯（靠近）信号*/
+    DOCK_R_L                     = 37;   /** 右接收到左信号*/
+    DOCK_R_ML                    = 38;   /** 右接收到中左信号*/
+    DOCK_R_M                     = 39;   /** 右接收到中信号*/
+    DOCK_R_MR                    = 40;   /** 右接收到中右信号*/
+    DOCK_R_R                     = 41;   /** 右接收到右信号*/
+
+    DOCK_BR_N                    = 42;   /** 右后接收到顶灯（靠近）信号*/
+    DOCK_BR_L                    = 43;   /** 右后接收到左信号*/
+    DOCK_BR_ML                   = 44;   /** 右后接收到中左信号*/
+    DOCK_BR_M                    = 45;   /** 右后接收到中信号*/
+    DOCK_BR_MR                   = 46;   /** 右后接收到中右信号*/
+    DOCK_BR_R                    = 47;   /** 右后接收到右信号*/
+    MAX_DOCK_NUM                 = 48;   /** 对位传感器的最大个数*/
+};
+
+/**< BUMPER*/
+enum BumperTypeT{
+    BMP_L                        =  0;    /**< left bumper*/
+    BMP_LF                       =  1;    /**< left front bumper*/
+    BMP_M                        =  2;    /**< front bumper*/
+    BMP_RF                       =  3;    /**< right front bumper*/
+    BMP_R                        =  4;    /**< right bumper*/
+    MAX_BMP_NUM                  =  5;    /**< 最大的bumper数*/
+};
+
+/**< CLIFF*/
+enum CliffTypeT{
+    CLF_L                        =  0;    /**< left cliff*/
+    CLF_LF                       =  1;    /**< left front cliff*/
+    CLF_M                        =  2;    /**< front cliff*/
+    CLF_RF                       =  3;    /**< right front cliff*/
+    CLF_R                        =  4;    /**< right cliff*/
+    MAX_CLF_NUM                  =  5;    /**< 最大的cliff数*/
+};
+
+
+/**< IR*/
+enum IrT{
+    IR_L                         =  0;    /**< left cliff ir*/
+    IR_LF                        =  1;    /**< left front ir*/
+    IR_M                         =  2;    /**< front cliff ir*/
+    IR_RF                        =  3;    /**< right front ir*/
+    IR_R                         =  4;    /**< right cliff ir*/
+    MAX_IR_NUM                   =  5;    /**< 最大的ir数*/
+};
+
+/**< FOLLOW WALL*/
+enum FollowWallT{
+    FOLLOW_WALL_L                =  0;    /**< left follow wall sensor*/
+    FOLLOW_WALL_R                =  1;    /**< right follow wall sensor*/
+    MAX_FOLLOW_NUM               =  2;    /**< 最大沿墙传感器数*/
+};
+
+/**< ULTRASONIC*/
+enum UltrasonicT{
+    ULTRASONIC_L                 =  0;    /**< left ultrasonic */
+    ULTRASONIC_R                 =  1;    /**< right ultrasonic */
+    MAX_ULTRASONIC_NUM           =  2;    /**< 最大超声波传感器数*/
+};
+
+/**< ENCODER*/
+enum EncoderT{
+    ENCODER_MOTO_L               =  0;        /**< 左编码器*/
+    ENCODER_MOTO_R               =  1;        /**< 右编码器*/
+    MAX_ENCODE_NUM               =  2;        /**< 最大编码器数*/
+};
+
+/** Items ID when we control speed;
+ *  all range from 0-100(data range -127 ~ 127)
+ *  some value can be negative to indicate reverse
+ **/
+enum NorMotorSpeedT{
+    NOR_SPD_NONE                 =  0; /** 归一化风机速度.0-100*/
+    NOR_SPD_FAN                  =  1;
+    NOR_SPD_ROLL                 =  2;
+    NOR_SPD_SIDE_BRUSH           =  3;
+    NOR_SPD_PUMP                 =  5;
+    MAX_NOR_SPD_NUM              =  8;
+};
+
+/** BATTERY info index */
+enum BatteryInfoT{
+
+    BATT_NONE                    =  0;
+
+    /** 电池电量使用0-100表示
+     * not real voltage but is percentage
+     **/
+            BATT_VOLTAGE                 =  1;
+
+    /** 电池温度         */
+            BATT_TMEP                    =  2;
+
+    /**< mat battery infos number **/
+            MAX_BATT_INFO_NUM            =  3;
+};
+
+/**< IMU; Internal usage  */
+enum ImuT{
+    /** X轴加速度*/
+            IMU_ACC_X                    =  0;
+    /** Y轴加速度*/
+            IMU_ACC_Y                    =  1;
+    /** Z轴加速度*/
+            IMU_ACC_Z                    =  2;
+    /** X轴角加速度*/
+            IMU_GYRO_X                   =  3;
+    /** Y轴角加速度*/
+            IMU_GYRO_Y                   =  4;
+    /** Z轴角加速度*/
+            IMU_GYRO_Z                   =  5;
+    /** X轴磁*/
+            IMU_MAG_X                    =  6;
+    /** Y轴磁*/
+            IMU_MAG_Y                    =  7;
+    /** Z轴磁*/
+            IMU_MAG_Z                    =  8;
+    /** 温度  */
+            IMU_TEMP                     =  9;
+    /** IMU Item Numbers*/
+            MAX_IMU_NUM                  =  10;
+
+
+
+};
+
+
+/** Special command send to Base; not used for app & iot */
+enum BaseCmdOutT{
+
+    /** 开始升级的指令*/
+            BASE_NORMAL                  =  0;
+
+    /** 回充的指令*/
+            BASE_DOCKING                 =  1;
+
+    /** 走直线的控制指令*/
+            BASE_WALK_STRAIGHT           =  2;
+
+    /** 沿墙的控制指令*/
+            BASE_FOLLOW_WALL             =  3;
+
+    /** 开始升级的指令*/
+            BASE_START_OTA               =  4;
+
+    /** 可以进行重启 */
+            BASE_REBOOT                  =  5;
+
+    /** 可以进行断电 */
+            BASE_POWEROFF                =  6;
+
+    /** 可以进行Sleep */
+            BASE_SLEEP                   =  7;
+
+    /** 下位机进行redock;用来区别于DOCK模式. */
+            BASE_REDOCKING               =  8;
+
+    /** 开始升级的指令  */
+            MAX_BASE_NUM                 =  9;
+};
+
+
+enum TestModuleT{
+    TEST_NONE                    = 0;
+    TEST_FOLLOW                  = 1;
+    TEST_NAVIGATA                = 2;
+    TEST_RANDOM                  = 3;
+};
+
+/**  RpcRequestT already Deprecated */
+enum RpcRequestT{
+    /**无    Deprecated */
+            RPC_RT_NONE                  = 0;
+
+    /**音量   Deprecated */
+            RPC_RT_LEVEL_SOUND           = 1;
+
+    /**语音包 Deprecated */
+            RPC_RT_SOUNDPKG              = 2;
+
+    /**喷水量 Deprecated */
+            RPC_RT_WATER_CLEAN           = 3;
+
+    /**擦地速度 Deprecated */
+            RPC_RT_SPEED_CLEAN           = 4;
+
+    /**定时任务 Deprecated */
+            RPC_RT_TASK_LIST             = 5;
+};
+
+enum ZoneTypeT{
+
+    /* go region */
+            ZONE_CLEAN                   = 0;
+
+    /* no-go region*/
+            ZONE_RESTRICTION             = 1;
+};
+
+enum ModulesT{
+    MODULES_NONE                 = 0;
+    MODULES_BASE                 = 1;
+    MODULES_IMU                  = 2;
+    MODULES_CAMERA               = 3;
+
+    MODULES_AUDIO                = 8;
+    MODULES_NETWORK              = 9;
+    MODULES_RTC                  = 10;
+    MODULES_VENDOR               = 11;
+};
+
+/** 机器清洁模式 **/
+enum CleanModeT {
+    CLEAN_MODE_FREE              = 0;
+    CLEAN_MODE_WORK_SUCTION      = 1;
+    CLEAN_MODE_WORK_MOP          = 2;
+    CLEAN_MODE_WORK_DRY_MOP      = 3;
+    CLEAN_MODE_WORK_ALL          = 5;
+    CLEAN_MODE_DOCKING           = 6;
+    CLEAN_MODE_CALIBRATE         = 7;
+};
+
+enum OtaSignalT{
+    OTA_SIG_NONE                 = 0;
+    OTA_SIG_START                = 1;
+    OTA_SIG_FAILED               = 2;
+    OTA_SIG_FINISH               = 3;
+    OTA_SIG_DOWNLOAD_START       = 4;
+    OTA_SIG_NO_SPACE_LEFT        = 5;
+    OTA_SIG_DOWNLOAD_FAILED      = 6;
+};
+
+enum SuctionModeT{
+    CM_NONE                      = 0;
+    CM_QUIET                     = 50;
+    CM_NORMAL                    = 75;
+    CM_MAX                       = 100;
+};
+
+enum MapIOStatus
+{
+    MAP_IO_NONE                  = 0;
+    MAP_IO_BUSY                  = 1;
+    MAP_IO_FINISHED              = 2;
+    MAP_IO_ERROR                 = 3;
+};
+
+
+/** PbToggle signal for protobuf;
+ *  Note:
+ *  A: for some signal; such as CleanIsFinished; RobotIsPickedup.
+ *    0: not set
+ *    1: setted; (such as clean is finished; robot is picked up)
+ *    2: xxxxxx Never shown
+ *
+ *  B: for toggle signal type. such as Mute signal; or Relocalization function
+ *    0: not set; (keep last setting)
+ *    1: enable something; something is success; (mute is enable ; reloc is success )
+ *    2: disable something; something is failed; (mute is disable; reloc is failed  )
+ */
+enum PbToggleT
+{
+    PB_TG_NONE                  = 0;
+    PB_TG_ON                    = 1;
+    PB_TG_OFF                   = 2;
+};
+
+enum FloorControlT
+{
+    FL_CTR_NONE                  = 0;
+
+    /**
+    * for PbInput: PbInput.floorCtr == FL_CTR_LOAD_ALL
+    * then all the map output would be shown in next
+    * PbOutput.map_out.persistMap; the size of the persistMap
+    * could be one or more; and MUST have one Map taged with "Default"
+    */
+            FL_CTR_LOAD_ALL              = 1;
+
+    /**
+    */
+            FL_CTR_UPDATE                = 2;
+    FL_CTR_DELETE                = 3;
+    FL_CTR_SET_DEFAULT           = 4;
+
+    /**
+     * merge selected candidate to genrate a persist map;
+     * params are in FloorControlParams.candidateIDs
+     */
+            FL_CTR_CANDIDATE_MERGE        = 5;
+
+    /**    *
+     * delete selected candidate from persist map file;
+     * params are in FloorControlParams.candidateIDs
+     */
+            FL_CTR_CANDIDATE_DELETE       = 6;
+
+    /**    *
+     * make selected candidate higher credit
+     * params are in FloorControlParams.candidateIDs
+     * if candidatesID is empty; we only make last clean report higer credit.
+     */
+            FL_CTR_CANDIDATE_THUMB_UP     = 7;
+
+    /**
+     * make selected candidate lower credits(even remove candidates)
+     * params are in FloorControlParams.candidatesID
+     * if candidatesID is empty; we only make last clean report lower credit.
+     */
+            FL_CTR_CANDIDATE_THUMB_DOWN    = 8;
+
+    /**    *
+     * delet all candidate maps
+     */
+            FL_CTR_CANDIDATE_RESET          = 9;
+
+    /**
+     * used to lock candidate.
+     * params are in FloorControlParams.candidateIDs
+     */
+            FL_CTR_CANDIDATE_LOCK           = 10;
+};
+
+enum MapMeasureRetT
+{
+
+    /**
+    * invalid type. should never happen
+    */
+            MM_NONE                      = 0;
+
+    /**
+    * rarely used; GlobalMap should remove all
+    */
+            MM_REMOVE_ALL                = 1;
+
+    /**
+    * don't save map
+    */
+            MM_UNCHANG                   = 2;
+
+    /**
+    * save map to current operating map(current default map)
+    */
+            MM_UPDATE_CURRENT            = 3;
+
+    /**
+    * save map to tmp Map.
+    */
+            MM_UPDATE_TMP_MAP            = 4;
+
+    /**
+    *
+    */
+            MM_UPDATE_VT                 = 5;
+
+    /**
+    *
+    */
+            MM_UPDATE_LIST               = 6;
+};
+
+enum CleanFinishStatus
+{
+    CFS_NONE                    = 0;
+    CFS_CHARGE_SUCCESS          = 1;
+    CFS_CHARGE_WHEN_ERR         = 2;
+    CFS_WITHOUT_CHARGE          = 3;
+};
+
+enum ChargeStatuBit
+{
+    CS_NONE                     = 0;
+    CS_CHARGING                 = 1;
+    CS_CHARG_FULL               = 2;
+    CS_ON_DOCK                  = 3;
+    CS_ON_LINE                  = 4;
+};
+
+enum CandidateSyncStatus
+{
+
+    /** candidate没有出现不同步的情况 */
+            CSS_NO_CHANGE               = 0;
+
+    /** vtbin文件出现不同步(多余); 并且删除了多余的vtbin*/
+            CSS_BINFILE_REMOVED         = 1;
+
+    /** candidate文件出现不同步(多余); 删除candidate */
+            CSS_CANDIDATE_REMOVED       = 2;
+
+    /** 同时删除了多余的Candidate和vtbin;恰好是(CSS_BINFILE_REMOVED |CSS_CANDIDATE_REMOVED ) */
+            CSS_BOTH_REMOVED            = 3;
+
+    /** 报错 文件路径错误等 */
+            CSS_FATAL                   = 4;
+};
+
+enum ChargeStatusT
+{
+    CS_UNCHARGE         = 0;    /*robot on charging-pile not charged*/
+    CS_CHARGINGLINE     = 1;    /*robot on charging-pile and is charging line 线充*/
+    CS_CHARGINGDOCKER   = 2;    /*robot on charging-pile and is charging docker 座充 */
+    CS_CHARGE_FULL      = 3;    /*robot on charging-pile and is charging full*/
+    CS_NOTONDOCK        = 4;    /*robot not on charging-pile*/
+};

@@ -1,0 +1,103 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+
+/** 透传消息， wifi信息。 */
+message PbNetConfig                            /**< infomation to config wifi network
+                                                *   only availible when robot is in wificonf mode
+                                                *   details take reference WifiConfig.pdf         */
+{
+   string          ssid              = 1;      /**< ssid                                          */
+   string          pwd               = 2;      /**< wifi password, Plain text                     */
+   string          type              = 3;      /**< security protocols, e.g None,WEP,WPA,WPA2     */
+   string          deviceName        = 4;      /**< L01 Device Name, let App to confirm online    */
+   string          productKey        = 5;      /**< Product Key, associate with deviceName above  */
+   string          bdpssid           = 6;      /**< ssid                                          */
+   string          dsnInfo           = 7;      /**< device serial number                          */
+}
+
+/** 透传消息， app连接时汇报 */
+message PbDeviceProfile                            /**< the FIRST message after app connected
+                                                *  report robot version info   APP 连接后的第一个消息          */
+{
+   /** main version, same with versionL01;版本号同versionL01    */
+   string          version           = 1;      
+
+   /** RoboServer Version, all HMI is related to this version, */
+   string          versionL01        = 2;      
+
+   /**< Firmware/FileSystem version, L01固件版本                 */
+   string          versionFW         = 3;  
+
+   /** MCU version MCU版本                                      */
+   string          versionMCU        = 4;  
+
+   /** Device Name for IOT(Ali & AWS) 设备名，给IOT使用的         */
+   string          deviceName        = 5;      
+
+   /** Device SN 设备SN，                                       */
+   string          deviceSN          = 6;      
+
+   /** Device IP 设备的网络地址                                  */
+   string          ipAddress         = 7; 
+
+   /** Device Mac Address 设备Mac地址                           */
+   string          macAddress        = 8;      
+
+   /** cloud server version                          */ 
+   string          versionIOTLib     = 9;      
+
+   /** MCU hardware version                          */ 
+   string          versionHWMCU      = 10;      
+
+   /** L01  hardware version                         */ 
+   string          versionHWL01      = 11;      
+
+   /** wifi module  version                          */ 
+   string          versionHWWIFI     = 12;      
+
+
+   /** MCU Bootloader version                       **/
+   string          versionMCUBL      = 13;      
+
+   /** BDP Version                                  **/ 
+   string          versionBDP        = 14;      
+
+   /** BDP defined MCU version                      **/ 
+   string          versionBDPDP      = 15;      
+
+   /** BDP defined MCU hardware version             **/ 
+   string          versionBDPDH      = 16;      
+
+
+   /** Module Name of robot, e.g Mesa Valley...     **/ 
+   string          moduleName        = 17;      
+}
+
+message PbOTAInfo
+{
+    /**< Target version number                          目标版本               */
+    string       targetVersion    = 1;
+
+    /**< Download progress                  下载进度           */
+    oneof hasProgress   {int32           progress         = 2;}
+
+    /**< Optional description information, 可选的描述信息， */
+    oneof hasChangeLog  {string          changeLog        = 3;}
+
+    /**<  hash checksum */
+    oneof hasMD5        {string          MD5              = 4;}
+
+     /**< Upgrade package size                           包大小                */
+    oneof hasSize       {int32           size             = 5;}
+
+    /**<  Used for AliIot, indicate ota path related to OSS */
+    string               directory   = 6;
+
+    /**<  Reserved,multiple upgrade addresses or paths    多个下载URL或本地路径  */
+    repeated string      urls        = 8;
+
+    /**<  OTA Signals  **DEPRECATED** */ 
+    oneof hasOtaSignal  {int32           otaSignal      = 9;}
+}

@@ -1,0 +1,36 @@
+/******************************************************************
+ * Items ONLY for Debug
+ * And should be DELETED for final release.
+ ******************************************************************/
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+import "PbConsts.proto";
+
+/** Debug setting   , app can ignore it if not needed */
+message PbDbgSetting
+{
+  PbToggleT    uploadLogFile          		                    = 1;       /**< trigger to upload log file                         */
+  PbToggleT    uploadMapFile          		                    = 2;       /**< trigger to upload map file  (deprecated )          */
+  string  vtParam                                           = 3;       /**< Dynamic set param for VisualTracker (rarely used)  */
+  oneof   hasLogLevel        { int32       logLevel         = 4; }; /**< Dynamic set LogLevel               动态设置LogLevel */
+  oneof   hasLogUpload       { PbToggleT        enLogUpload      = 5; }; /**< Dynamic enable log via PbOutput (rarely used)      */
+  oneof   hasBatteryControl  { int32       batteryControl   = 7; };  /**< Dynamic set dock battery threshold 0-100                */
+  string  netcatAddress                                     = 8;       /**< (deprecated)                                       */
+  int32   netcatPort                                        = 9;       /**< (deprecated)                                       */
+  oneof   hasUploadInterval  { int32      mapUploadInterval = 10; }   /**< dynamic set map upload interval, default 2000ms         */
+ // oneof   hasTestModuleT     { TestModuleT testModule       = 6; }; /**< Dynamic set test info                       */
+}
+
+/** Debug Info output, app can ignore it if not needed */
+message PbDbgInfo
+{
+  oneof    hasLogUpload {PbToggleT  enLogUpload  = 1;}; /**<                                                    */
+  repeated string logs 			            = 2;   /**< return logs                                        */
+  PbToggleT     uploadLogFile          		    = 3;   /**< trigger to upload log                              */
+  PbToggleT     uploadMapFile          		    = 4;   /**< trigger to upload map                              */
+  int32    uploadPercent                    = 5;   /**< upload percentage, for map and log                 */
+  string   vtParam                          = 6;   /**<                                                    */
+  float    loopVariance                     = 9;   /**< monitor the main loop threads interval             */
+}
+

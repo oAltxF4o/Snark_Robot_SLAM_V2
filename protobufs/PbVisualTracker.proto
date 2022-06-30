@@ -1,0 +1,47 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+import "PbConsts.proto";
+/* import "PbMessages.proto";*/
+
+message VTInput
+{
+     oneof hasSoftCalFlag        { PbToggleT      softCalFlag       = 1;}   /**< calibrate IMU temperature drift, 校准标志
+                                                                         *   NotExit: calibration not working
+                                                                         *   False:   calibration, not success yet, until timeout
+                                                                         *   True:    relocate success,                              */
+     oneof hasReturnCheckCameraQuality   { PbToggleT    returnCheckCameraQuality  = 2;}  /**< 检测Camera Quality signal               */
+     oneof hasRelocation         { PbToggleT      relocation        = 3;}   /**< relocation's result,
+                                                                         *   NotExit: relocation not working
+                                                                         *   False:   relocating, not success yet, until timeout
+                                                                         *   True:    relocate success,                              */
+      oneof hasReturnCheckTempcoeffs      { PbToggleT    returnCheckTempcoeffs    = 4;} /**< 返回温度标定的结果>                        */
+      oneof hasTempCaliTimeFlag           { PbToggleT    tempCaliTimeFlag         = 5;} /**< 温度标定时间条件>                          */
+      oneof hasRebootTimeFlag             { PbToggleT    rebootTimeFlag           = 6;} /**< 重启时间条件>                          */
+
+}
+
+message VTOutput
+{
+    oneof hasPickUp            { PbToggleT        pickUp            = 4;} ///< is picked up                                 判断是否被抱起
+    oneof hasVTControl         { VTControlT  VTControl         = 5;} ///< VisualTracker Control signal                 控制信号
+    oneof hasSoftCal           { PbToggleT        softCal           = 6;} ///< command to cali temperature drift            软件矫正偏移
+    oneof hasCheckCameraQuality{ PbToggleT      checkCameraQuality  = 7;} ///< Return Cameral image 返回图片质量检测结果
+    oneof hasResetOdom         { PbToggleT        resetOdom         = 8; } ///< (rarely used) set current odom (0,0,0)       设置当前位置为0
+}
+
+
+
+
+message MapServerInput
+{
+
+    //not usefull currently
+    int32 reserved                                             =1;
+}
+
+message MapServerOutput
+{
+    oneof hasVTControl         { VTControlT  VTControl         = 1;}
+    repeated int32               controlParams                 = 2;
+}

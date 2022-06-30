@@ -1,0 +1,296 @@
+syntax = "proto3";
+option optimize_for = LITE_RUNTIME;
+package pb;
+
+import "PbConsts.proto";
+import "PbMessages.proto";
+
+message PbPolygon {
+    repeated PbPoint2Df pts = 1;
+}
+
+message PbZone
+{
+
+    /** enum ZONE_CLEAN =0，ZONE_RESTRICTION = 1        */
+    ZoneTypeT            type    = 1;
+
+    /** zone name        */
+    string               name    = 2;
+
+    /** points to describe regions, every 4 points combined a region,TODO change comments
+     *  start from top left point ,clockwise.
+     *  if there are 12 points, means 3 regions
+     **/
+    repeated PbPolygon   polys   = 4;
+
+    PbToggleT            enabled = 5;
+
+    /* uniqe hash name of a zone */
+    string               hash    = 3;
+
+}
+
+message PbErrorPose
+{
+    /** robot's pose when first the robot get the error/warning */
+    PbPose2Df  pose              = 1;
+    /** error and warning code **/
+    ErrorCodeT error             = 2;
+    WarningCodeT warn            = 3;
+    /** reserved. extern infomation */
+    string     info              = 4;
+    /** seconds from cleaning start. */
+    int32      time_s            = 5;
+}
+
+/** data structure of grid map*/
+message PbMapData
+{
+    float     cellSize           = 1;    ///< cell resolution in METER, typically 0.07m(7cm).
+    PbPose2Df offset             = 2;
+    int32     width              = 3;    ///< columns of map
+    int32     height             = 4;    ///< rows of map
+    int32     elementSize        = 5;    ///< currently always 1, each point is indicated by one byte.
+
+    /********************************************************\
+     *   Array of map data, every single point is a uint8,
+     *   length of array MUST always be (height * width).
+     *   currently we use following numbers:
+     *     0  : cells already cleaned
+     *     50 : boundary cells
+     *     75 : undetected cells
+     *     100: obstacle cells
+     *   地图数据的集合,每个点是个uint8,长度是 (height * width),
+     *   目前,0代表已打扫过, 50:未探索边缘 75:未探测 100:代表障碍物
+    \********************************************************/
+    bytes     mapData            = 6;
+    float     credit             = 7;
+    int32     updateCounts       = 8;
+    oneof    hasStationPose { 
+	    PbPose2Df chargeStationPose  = 9;
+    }
+    float     shapeScore         = 10;
+    int32     ID                 = 11;
+    int32     failedCounts       = 12;
+    int32     realCredit         = 13;
+    int32     lmDensity          = 14;
+    int32     lmStability        = 15;
+
+    /**
+     * if PB::ON, means the data is new candidate
+     * if PB::OFF | PB::NONE, then the data is already marked
+     **/
+    PbToggleT isNewCandidate     = 16;
+    MapDataTypeT dataType        = 17;
+}
+
+/** data structure of grid map*/
+message PbMapMeasure
+{
+    repeated PbMapData maps      = 1;
+    repeated PbMapData heatMaps  = 2;
+    repeated PbMapData candidateMaps = 3;
+}
+
+/**
+** 路径分辨率说明 **
+* 路径中的所有距离表示都是用整数代替的.每一个整数都是带符号的short(int16)类型.
+* 所有长度相关数据以2mm（lengthUnit）精度.包括 resolution,offset,pathpoint,robotPos，stationPos，landMark
+* 例如 X = 0.2米 换算成 整数就是x = (0.2 / 0.002) = 100;
+* 同理,如果 得到一个整数y = -123 则 代表世界坐标中 Y = -0.246米.
+* 每个int16整数的取值范围是-32767 - +32767.
+* 每个整数能够表示的最大距离范围是 -65 - + 65米.
+*  **PbIntegerPath resolution explain **
+*  All distance in PbIntegerPath is integer with sign (int16).
+*  The Unit of integer is 2mm(lengthUnit). e.g. resolution,offset,pathpoint,robotPos，stationPos，landMark
+*  e.g X = 0.2m (in real world), the integer x = (0.2/0.002) = 100;
+*  and if we got y = -123 means Y = -0.246 in real world.
+*  int16 covers from -32767 to +32767
+*  so the coordinate can indicate from -65m ~ +65m( when lengthUnit == 0.002)
+**/
+message PbIntPoints
+{
+    float     pointsResolution   = 1;    ///< points resolution in METER, typically 0.002m(2mm).
+    int32     pointElemSize      = 2;    ///< element size, always 2;  元素类型的字节数,默认2字节
+    bytes     binaryPointsData   = 3;
+}
+
+/**
+ * used to evaluate how good the clean task is.
+ */
+message PbVtSummary                     
+{ 
+   int32 nFrames        = 1;
+   int32 nNotEnoughKPs  = 2;
+   int32 nOldLandmarks  = 3;
+   int32 nNewLandmarks  = 4;
+   int32 nLoopWithOldLM = 5;
+   int32 nLoopWithNewLM = 6;
+   PbToggleT relocFlag  = 7; 
+}
+
+/* map info summary, only show when clean cycle is finished
+*/
+message PbMapSummary                     
+{
+
+    /// start time          unit: UNIX time, seconds from 01/01/1970    
+    int32 beginTime              = 1;    
+
+    /// current clean time  unit: minutes
+    int32 currentCleanTime       = 2;  
+
+    /** current clean area  unit: 0.01 squre meter. e.g. 200 means 2 sq. meter.
+     * if you wanna get clean area for this time, use this number/100.0 is the sq.meter.
+     */    
+    int32 currentArea            = 3;
+
+    /// total   clean time  unit: minutes     
+    int32 allCleanTime           = 4;
+
+    /// total   clean area  unit: 0.01 squre meter. 
+    int32 allCleanArea           = 5;
+
+    /// total clean counter   
+    int32 allCleanCount          = 6;
+
+    /// is current clean finished && dock success
+    PbToggleT  isFinish               = 7;
+
+    /// total dust change times 
+    int32 totalDustChangeCount   = 8;   
+
+
+/**
+ * used to evaluate how good the clean task is.
+ */
+    oneof hasVtSummary{ PbVtSummary  vtSummary = 9;  }
+
+    /// whether this clean is comes from station 
+    PbToggleT isFromStation          = 10;   
+
+    /// whether this clean is docked by itself 
+    PbToggleT isDockSuccess          = 11;   
+
+    /// whether this clean is docked by itself 
+    PbToggleT isAllAreaCleaned       = 12;   
+
+    /// total number of go zone and no gozones 
+    int32     GnGCounts              = 13;   
+
+    /// if Time/Area ratio too large, the robot will force finish clean. 
+    PbToggleT isTimeAreaRatioTooLarge = 14;   
+
+    /// Failed reason
+    int32     error                   = 15;
+    
+}
+
+
+
+
+message PbFloor
+{
+    int32    id                  = 1;     ///< ID
+    string   name                = 2;
+    string   hashID              = 3;
+    MapTypeT type                = 4;
+
+    oneof    hasMap         { 
+
+	PbMapData    map                = 5; }
+
+    oneof    hasStationPose { 
+
+	///< Docker position (X,Y)       充电桩的位置(todo)
+	PbPose2Df    stationPose        = 6; }   
+
+    oneof    hasRobotPose   { 
+
+	///< Robot  position (X,Y)       机器人位置 (todo)
+	PbPose2Df    robotPose          = 7; }   
+
+    oneof    hasCleanPath   { 
+
+	///< 每两个byte组成一个距离数据(int16),每两个点组成一个坐标(x,y),
+	PbIntPoints  CleanPath          = 8; }
+
+    oneof    hasKeyFrame    { 
+
+	///< (debug)keyframe information 关键帧(todo)
+	PbIntPoints  keyFrame           = 9; }
+
+    oneof    hasLandMark    { 
+
+	///< (debug)landmark information 路标,特征点集合(todo)
+	PbIntPoints  landMark           = 10;}   
+
+    oneof    hasMapSummary  { 
+
+	///< Map summary information     地图概略信息
+	PbMapSummary summary            = 11;}
+
+
+    oneof    hasCreateTime  { 
+
+	///建立时间
+	int32        createTime         = 12;}   
+
+
+
+    oneof    hasCleanTime   { 
+
+	///清扫时间
+	int32        cleanTime          = 13;}   
+
+
+    oneof    hasCredit      { 
+
+	///Deprecated 
+	int32        credit             = 14; }  
+
+
+    ///清扫区域
+    repeated PbZone 	      goZone                          = 15;
+
+    ///非清扫区域
+    repeated PbZone 	      noGoZone                        = 16;   
+
+    ///< 出错地点
+    repeated PbErrorPose      errorPoseList                   = 17;
+
+    ///< whether Robot start from station 是否从充电桩启动
+    int32    isFromStation                                    = 18;
+
+    oneof    hasVtTransform  { 
+
+    /** transform  from Vt Coordinate to PP Coordinate       **/
+	PbPose2Df  vttransform                                = 19;
+    }
+
+    oneof    hasMapMeasure         {
+        PbMapMeasure   mapMeasure                             = 20;
+    }
+
+    oneof    hasPersistMap         {
+        PbMapData      persistMap                             = 21;
+    }
+
+    PbToggleT isDefault                                       = 22;
+
+    // how many times the map have been cleaned
+    int32        cleanCounter                                 = 23;
+    
+    // reserved
+    repeated string extendInfo                                = 24;
+
+    int32        mapVersion                                   = 25;
+
+    /* whether the persistmap is locked */
+    PbToggleT isLocked                                        = 26;
+
+    /* is in training mode  */
+    PbToggleT isTrainFinish                                   = 27;
+}
+
